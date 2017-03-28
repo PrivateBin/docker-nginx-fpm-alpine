@@ -6,10 +6,9 @@ RUN \
 # Install dependencies
     apk add --no-cache nginx supervisor \
 # Install PHP extension
-    && docker-php-ext-install opcache
-
+    && docker-php-ext-install opcache \
 # Remove (some of the) default nginx config
-RUN rm -f /etc/nginx.conf \
+    && rm -f /etc/nginx.conf \
     && rm -rf /etc/nginx/sites-* \
     && rm -rf /var/log/nginx \
 # Ensure nginx logs, even if the config has errors, are written to stderr
