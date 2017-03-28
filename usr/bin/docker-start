@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+set -eu
+
+chown www-data.www-data "${DOCUMENT_ROOT}"
+
+for file in /etc/nginx/*/*.conf; do
+    sed -i \
+        -e "s#{{REDIRECT_CODE}}#${REDIRECT_CODE}#g" \
+        -e "s#{{DOCUMENT_ROOT}}#${DOCUMENT_ROOT}#g" \
+        "${file}"
+done
+
+if [[ "${REDIRECT_MODE}" == "apex-to-www" ]]; then
+    ln -s \
+        /etc/nginx/sites-available/redirect-apex-to-www.conf \
+        /etc/nginx/sites-enabled/redirect-apex-to-www.conf
+elif [[ "${REDIRECT_MODE}" == "www-to-apex" ]]; then
+    ln -s \
+        /etc/nginx/sites-available/redirect-www-to-apex.conf \
+        /etc/nginx/sites-enabled/redirect-www-to-apex.conf
+fi
+
+exec /usr/bin/supervisord
