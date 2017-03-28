@@ -7,6 +7,7 @@ for file in /etc/nginx/*/*.conf; do
     sed -i \
         -e "s#{{REDIRECT_CODE}}#${REDIRECT_CODE}#g" \
         -e "s#{{DOCUMENT_ROOT}}#${DOCUMENT_ROOT}#g" \
+        -e "s#{{REDIRECT_SCHEME}}#${REDIRECT_SCHEME}#g" \
         "${file}"
 done
 

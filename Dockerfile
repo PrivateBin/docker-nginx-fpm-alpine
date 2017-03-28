@@ -33,6 +33,10 @@ ENV REDIRECT_MODE="none"
 # Which HTTP code should we use for the above redirect
 ENV REDIRECT_CODE=302
 
+# And the protocol we should redirect to. Change this to "https" if you
+# serve via https (e.g. with a SSL-termination proxy infront of this)
+ENV REDIRECT_SCHEME="http"
+
 ADD etc/ /etc/
 ADD usr/ /usr/
 
