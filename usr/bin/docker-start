@@ -11,6 +11,7 @@ for file in /etc/nginx/*/*.conf; do
         "${file}"
 done
 
+rm -f /etc/nginx/sites-enabled/redirect-*.conf
 if [[ "${REDIRECT_MODE}" == "apex-to-www" ]]; then
     ln -s \
         /etc/nginx/sites-available/redirect-apex-to-www.conf \
