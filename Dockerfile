@@ -15,6 +15,9 @@ RUN \
     && rm /var/lib/nginx/logs \
     && mkdir -p /var/lib/nginx/logs \
     && ln -s /dev/stderr /var/lib/nginx/logs/error.log \
+# Create folder where the user hook into our default configs
+    && mkdir -p /etc/nginx/server.d/ \
+    && mkdir -p /etc/nginx/location.d/ \
 # Remove default content from the default $DOCUMENT_ROOT ...
     && rm -rf /var/www \
 # ... but ensure it exists with the right owner
