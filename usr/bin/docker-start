@@ -1,25 +1,31 @@
 #!/usr/bin/env sh
 set -eu
 
-chown www-data.www-data "${DOCUMENT_ROOT}"
-
-for file in /etc/nginx/*/*.conf; do
-    sed -i \
-        -e "s#{{REDIRECT_CODE}}#${REDIRECT_CODE}#g" \
-        -e "s#{{DOCUMENT_ROOT}}#${DOCUMENT_ROOT}#g" \
-        -e "s#{{REDIRECT_SCHEME}}#${REDIRECT_SCHEME}#g" \
-        "${file}"
-done
-
-rm -f /etc/nginx/sites-enabled/redirect-*.conf
-if [[ "${REDIRECT_MODE}" == "apex-to-www" ]]; then
-    ln -s \
-        /etc/nginx/sites-available/redirect-apex-to-www.conf \
-        /etc/nginx/sites-enabled/redirect-apex-to-www.conf
-elif [[ "${REDIRECT_MODE}" == "www-to-apex" ]]; then
-    ln -s \
-        /etc/nginx/sites-available/redirect-www-to-apex.conf \
-        /etc/nginx/sites-enabled/redirect-www-to-apex.conf
+# Properly detect requested redirect
+if [ "${REDIRECT_PROTO}" == "auto" ]; then
+    REDIRECT_PROTO="\$http_x_forwarded_proto";
+elif [ "${REDIRECT_PROTO}" != "http" ] && [ "${REDIRECT_PROTO}" != "https" ]; then
+    echo "ERROR: Invalid value for REDIRECT_PROTO, got '${REDIRECT_PROTO}'" >&2
+    echo "ERROR: Valid values are: 'auto', 'http' or 'https'" >&2
+    exit 1
 fi
 
-exec /usr/bin/supervisord
+# Replace templates in nginx config
+for file in /etc/nginx/*/*.tpl; do
+    sed \
+        -e "s#{{DOCUMENT_ROOT}}#${DOCUMENT_ROOT}#g" \
+        -e "s#{{REDIRECT_CODE}}#${REDIRECT_CODE}#g" \
+        -e "s#{{REDIRECT_PROTO}}#${REDIRECT_PROTO}#g" \
+        "${file}" \
+        > "${file%.tpl}"
+done
+
+# Activate the right
+rm -f /etc/nginx/sites-enabled/redirect-*.conf
+if [[ -f "/etc/nginx/sites-available/redirect-${REDIRECT_MODE}.conf" ]]; then
+    ln -s \
+        "/etc/nginx/sites-available/redirect-${REDIRECT_MODE}.conf" \
+        "/etc/nginx/sites-enabled/redirect-${REDIRECT_MODE}.conf"
+fi
+
+exec /usr/bin/supervisord -c /etc/supervisord.conf
