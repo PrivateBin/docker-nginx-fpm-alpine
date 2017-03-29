@@ -33,8 +33,8 @@ ENV REDIRECT_MODE="none"
 # Which HTTP code should we use for the above redirect
 ENV REDIRECT_CODE=302
 
-# And the protocol we should redirect to. Change this to "https" if you
-# serve via https (e.g. with a SSL-termination proxy infront of this)
+# Which protocol should we use to do the above redirect? Valid options are
+# "http", "https" or "auto" (which will trust X-Forwarded-Proto)
 ENV REDIRECT_PROTO="auto"
 
 ADD etc/ /etc/
