@@ -1,12 +1,18 @@
-FROM php:7.1-fpm-alpine
+FROM php:fpm-alpine
 
 MAINTAINER Michael Contento <mail@michaelcontento.de>
 
 RUN \
 # Install dependencies
     apk add --no-cache nginx supervisor \
-# Install PHP extension
+# Install PHP extension: opcache
     && docker-php-ext-install opcache \
+    && rm -f /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
+# Install PHP extension: xdebug
+    && apk add --no-cache g++ make autoconf \
+    && pecl install xdebug \
+    && apk del g++ make autoconf \
+    && rm -rf /tmp/pear \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf \
     && rm -rf /etc/nginx/sites-* \
@@ -22,7 +28,8 @@ RUN \
     && rm -rf /var/www \
 # ... but ensure it exists with the right owner
     && mkdir -p /var/www \
-    && chown www-data.www-data /var/www
+    && echo "<?php phpinfo();" > /var/www/index.php \
+    && chown -R www-data.www-data /var/www
 
 WORKDIR /var/www
 
@@ -39,6 +46,13 @@ ENV REDIRECT_CODE=302
 # Which protocol should we use to do the above redirect? Valid options are
 # "http", "https" or "auto" (which will trust X-Forwarded-Proto)
 ENV REDIRECT_PROTO="auto"
+
+# Change this to true/1 to enable the xdebug extension for php. You need to change
+# some xdebug settings? E.g. xdebug.idekey? Just set a environment variable with the dot
+# replaced with an underscore (xdebug.idekey => XDEBUG_IDEKEY) and they xdebug config will
+# be changed on container start. This is a fast and simple alternative to adding a custom
+# config ini in /usr/local/etc/php/conf.d/
+ENV XDEBUG=false
 
 ADD etc/ /etc/
 ADD usr/ /usr/

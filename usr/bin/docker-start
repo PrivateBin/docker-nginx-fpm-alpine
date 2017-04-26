@@ -28,4 +28,16 @@ if [[ -f "/etc/nginx/sites-available/redirect-${REDIRECT_MODE}.conf" ]]; then
         "/etc/nginx/sites-enabled/redirect-${REDIRECT_MODE}.conf"
 fi
 
+# Configure or disable XDebug as requested
+XDEBUG_INI="/usr/local/etc/php/conf.d/10-xdebug.ini"
+if [ ${XDEBUG} = true ] || [ "${XDEBUG}" == "1" ]; then
+    env \
+        | egrep '^XDEBUG_' \
+        | sed -e 's/XDEBUG_/xdebug./' \
+        | tr 'A-Z' 'a-z' \
+        >> "${XDEBUG_INI}"
+else
+    rm -f "${XDEBUG_INI}"
+fi
+
 exec /usr/bin/supervisord -c /etc/supervisord.conf
