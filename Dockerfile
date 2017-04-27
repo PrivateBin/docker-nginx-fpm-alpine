@@ -29,7 +29,12 @@ RUN \
 # ... but ensure it exists with the right owner
     && mkdir -p /var/www \
     && echo "<?php phpinfo();" > /var/www/index.php \
-    && chown -R www-data.www-data /var/www
+    && chown -R www-data.www-data /var/www \
+# Bring php-fpm configs into a more controallable state
+    && rm /usr/local/etc/php-fpm.d/www.conf.default \
+    && mv /usr/local/etc/php-fpm.d/docker.conf /usr/local/etc/php-fpm.d/00-docker.conf \
+    && mv /usr/local/etc/php-fpm.d/www.conf /usr/local/etc/php-fpm.d/10-www.conf \
+    && mv /usr/local/etc/php-fpm.d/zz-docker.conf /usr/local/etc/php-fpm.d/20-docker.conf
 
 WORKDIR /var/www
 
@@ -53,6 +58,11 @@ ENV REDIRECT_PROTO="auto"
 # be changed on container start. This is a fast and simple alternative to adding a custom
 # config ini in /usr/local/etc/php/conf.d/
 ENV XDEBUG=false
+
+# Which environment variables should be available to PHP? For security reasons we do not expose
+# any of them to PHP by default.
+# Valid values are "none" and "all"
+ENV ENV_WHITELIST="none"
 
 ADD etc/ /etc/
 ADD usr/ /usr/

@@ -40,4 +40,12 @@ else
     rm -f "${XDEBUG_INI}"
 fi
 
+if [ "${ENV_WHITELIST}" == "all" ]; then
+    rm -rf /usr/local/etc/php-fpm.d/50-clear-env.conf
+elif [ "${ENV_WHITELIST}" != "none" ]; then
+    echo "ERROR: Invalid value for ENV_WHITELIST, got '${ENV_WHITELIST}'" >&2
+    echo "ERROR: Valid values are: 'none' or 'all'" >&2
+    exit 1
+fi
+
 exec /usr/bin/supervisord -c /etc/supervisord.conf
