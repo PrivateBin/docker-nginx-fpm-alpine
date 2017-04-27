@@ -31,11 +31,11 @@ fi
 # Configure or disable XDebug as requested
 XDEBUG_INI="/usr/local/etc/php/conf.d/10-xdebug.ini"
 if [ ${XDEBUG} = true ] || [ "${XDEBUG}" == "1" ]; then
-    env \
-        | egrep '^XDEBUG_' \
-        | sed -e 's/XDEBUG_/xdebug./' \
-        | tr 'A-Z' 'a-z' \
-        >> "${XDEBUG_INI}"
+    for setting in $(env | egrep '^XDEBUG_'); do
+        key=$(echo "${setting}" | cut -d'=' -f1 | sed -e 's/XDEBUG_/xdebug./' | tr 'A-Z' 'a-z')
+        value=$(echo "${setting}" | cut -d'=' -f2-)
+        echo "${key}=${value}" >> "${XDEBUG_INI}"
+    done
 else
     rm -f "${XDEBUG_INI}"
 fi
