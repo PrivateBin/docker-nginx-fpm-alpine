@@ -4,8 +4,5 @@ examples/
 # Git
 .git/
 
-# PHPStorm
-.idea/
-
 # OSX
 .DS_Store

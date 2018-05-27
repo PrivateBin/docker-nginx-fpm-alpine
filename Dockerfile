@@ -1,20 +1,24 @@
 FROM php:fpm-alpine
 
-MAINTAINER Michael Contento <mail@michaelcontento.de>
+MAINTAINER PrivateBin <support@privatebin.org>
 
 RUN \
 # Install dependencies
     apk add --no-cache nginx supervisor \
 # Install PHP extension: opcache
-    && docker-php-ext-install opcache \
+    && docker-php-ext-install -j$(nproc) opcache \
     && rm -f /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
-# Install PHP extension: xdebug
-    && apk add --no-cache g++ make autoconf \
-    && pecl install xdebug \
-    && apk del g++ make autoconf \
-    && rm -rf /tmp/pear \
+# Install PHP extension: gd
+    && apk add --no-cache freetype libpng libjpeg-turbo freetype-dev libpng-dev libjpeg-turbo-dev \
+    && docker-php-ext-configure gd \
+        --with-freetype-dir=/usr/include/ \
+        --with-png-dir=/usr/include/ \
+        --with-jpeg-dir=/usr/include/ \
+  && docker-php-ext-install -j$(nproc) gd \
+  && apk del --no-cache freetype-dev libpng-dev libjpeg-turbo-dev \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf \
+    && rm -f /etc/nginx/conf.d/default.conf \
     && rm -rf /etc/nginx/sites-* \
     && rm -rf /var/log/nginx \
 # Ensure nginx logs, even if the config has errors, are written to stderr
@@ -38,35 +42,12 @@ RUN \
 
 WORKDIR /var/www
 
-# Where nginx should serve from
-ENV DOCUMENT_ROOT=/var/www
-
-# Should we instantiate a redirect for apex-to-www? Or www-to-apex?
-# Valid values are "none", "www-to-apex" or "apex-to-www"
-ENV REDIRECT_MODE="none"
-
-# Which HTTP code should we use for the above redirect
-ENV REDIRECT_CODE=302
-
-# Which protocol should we use to do the above redirect? Valid options are
-# "http", "https" or "auto" (which will trust X-Forwarded-Proto)
-ENV REDIRECT_PROTO="auto"
-
-# Change this to true/1 to enable the xdebug extension for php. You need to change
-# some xdebug settings? E.g. xdebug.idekey? Just set a environment variable with the dot
-# replaced with an underscore (xdebug.idekey => XDEBUG_IDEKEY) and they xdebug config will
-# be changed on container start. This is a fast and simple alternative to adding a custom
-# config ini in /usr/local/etc/php/conf.d/
-ENV XDEBUG=false
-
-# Which environment variables should be available to PHP? For security reasons we do not expose
-# any of them to PHP by default.
-# Valid values are "none" and "all"
-ENV ENV_WHITELIST="none"
-
 ADD etc/ /etc/
 ADD usr/ /usr/
 
+# mark dirs as volumes that need to be writable, allows running the container --read-only
+VOLUME /tmp /var/tmp /var/run /var/log
+
 EXPOSE 80
 
-CMD ["/usr/bin/docker-start"]
+ENTRYPOINT ["/usr/bin/supervisord","-c","/etc/supervisord.conf"]
