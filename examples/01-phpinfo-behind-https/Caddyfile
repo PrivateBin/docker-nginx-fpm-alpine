@@ -1,7 +1,0 @@
-https://* {
-    errors stderr
-    tls self_signed
-    proxy / http://backend:80 {
-        transparent
-    }
-}
