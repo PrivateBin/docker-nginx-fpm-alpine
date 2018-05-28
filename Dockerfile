@@ -2,6 +2,8 @@ FROM php:fpm-alpine
 
 MAINTAINER PrivateBin <support@privatebin.org>
 
+ENV RELEASE 1.1.1
+
 RUN \
 # Install dependencies
     apk add --no-cache nginx supervisor \
@@ -35,12 +37,18 @@ RUN \
     && mv /usr/local/etc/php-fpm.d/zz-docker.conf /usr/local/etc/php-fpm.d/20-docker.conf \
 # Install PrivateBin
     && apk add --no-cache gnupg \
+    && export GNUPGHOME="$(mktemp -d)" \
+    && gpg2 --list-public-keys || /bin/true \
+    && curl -s https://privatebin.info/key/rugk.asc | gpg2 --import - \
     && cd /tmp \
-    && curl -s https://codeload.github.com/PrivateBin/PrivateBin/tar.gz/1.1.1 | tar -xzf - \
+    && curl -Ls https://github.com/PrivateBin/PrivateBin/releases/download/${RELEASE}/PrivateBin-${RELEASE}.tar.gz.asc > PrivateBin-${RELEASE}.tar.gz.asc \
+    && curl -Ls https://github.com/PrivateBin/PrivateBin/archive/${RELEASE}.tar.gz > PrivateBin-${RELEASE}.tar.gz \
+    && gpg2 --verify PrivateBin-${RELEASE}.tar.gz.asc \
+    && tar -xzf PrivateBin-${RELEASE}.tar.gz \
     && rm -rf /var/www \
-    && mv /tmp/PrivateBin-1.1.1 /var/www \
+    && mv /tmp/PrivateBin-${RELEASE} /var/www \
     && cd /var/www \
-    && rm *.md \
+    && rm *.md cfg/conf.sample.php \
     && mv cfg /srv \
     && mv lib /srv \
     && mv tpl /srv \
@@ -48,6 +56,7 @@ RUN \
     && mkdir -p /srv/data \
     && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" index.php \
     && chown -R www-data.www-data /var/www /srv/* \
+    && rm -rf "${GNUPGHOME}" /tmp/* \
     && apk del --no-cache gnupg
 
 WORKDIR /var/www
@@ -56,7 +65,7 @@ ADD etc/ /etc/
 ADD usr/ /usr/
 
 # mark dirs as volumes that need to be writable, allows running the container --read-only
-VOLUME /srv/data /srv/cfg/conf.php /tmp /var/tmp /var/run /var/log
+VOLUME /srv/data /tmp /var/tmp /var/run /var/log
 
 EXPOSE 80
 
