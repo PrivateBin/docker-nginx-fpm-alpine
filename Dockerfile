@@ -2,7 +2,7 @@ FROM php:fpm-alpine
 
 MAINTAINER PrivateBin <support@privatebin.org>
 
-ENV RELEASE 1.1.1
+ENV RELEASE 1.2
 
 RUN \
 # Install dependencies
@@ -39,7 +39,7 @@ RUN \
     && apk add --no-cache gnupg \
     && export GNUPGHOME="$(mktemp -d)" \
     && gpg2 --list-public-keys || /bin/true \
-    && curl -s https://privatebin.info/key/rugk.asc | gpg2 --import - \
+    && curl -s https://privatebin.info/key/security.asc | gpg2 --import - \
     && rm -rf /var/www/* \
     && cd /tmp \
     && curl -Ls https://github.com/PrivateBin/PrivateBin/releases/download/${RELEASE}/PrivateBin-${RELEASE}.tar.gz.asc > PrivateBin-${RELEASE}.tar.gz.asc \
