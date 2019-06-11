@@ -1,4 +1,4 @@
-FROM php:fpm-alpine
+FROM php:7.3.6-fpm-alpine3.9
 
 MAINTAINER PrivateBin <support@privatebin.org>
 
