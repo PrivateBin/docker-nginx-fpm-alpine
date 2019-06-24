@@ -20,6 +20,8 @@ The parameters in detail:
 - `-d` - launches the container in the background. You can use `docker ps` and `docker logs` to check if the container is alive and well.
 - `--restart="always"` - restart the container if it crashes, mainly useful for production setups
 
+> Note that the volume mounted must be owned by UID 65534 / GID 82. If you run the container in a docker instance with "userns-remap" you need to add your subuid/subgid range to these numbers.
+
 ### Custom configuration
 
 In case you want to use a customized [conf.php](https://github.com/PrivateBin/PrivateBin/blob/master/cfg/conf.sample.php) file, for example one that has file uploads enabled or that uses a different template, add the file as a second volume:
