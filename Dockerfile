@@ -1,4 +1,4 @@
-FROM php:7.3.6-fpm-alpine3.9
+FROM alpine:3.10.0
 
 MAINTAINER PrivateBin <support@privatebin.org>
 
@@ -6,18 +6,8 @@ ENV RELEASE 1.2.1
 
 RUN \
 # Install dependencies
-    apk add --no-cache nginx supervisor \
-# Install PHP extension: opcache
-    && docker-php-ext-install -j$(nproc) opcache \
-    && rm -f /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
-# Install PHP extension: gd
-    && apk add --no-cache freetype libpng libjpeg-turbo freetype-dev libpng-dev libjpeg-turbo-dev \
-    && docker-php-ext-configure gd \
-        --with-freetype-dir=/usr/include/ \
-        --with-png-dir=/usr/include/ \
-        --with-jpeg-dir=/usr/include/ \
-    && docker-php-ext-install -j$(nproc) gd \
-    && apk del --no-cache freetype-dev libpng-dev libjpeg-turbo-dev \
+    apk add --no-cache supervisor nginx php7-fpm php7-json php7-gd php7-opcache \
+        php7-pdo_mysql php7-pdo_pgsql \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf \
     && rm -f /etc/nginx/conf.d/default.conf \
@@ -30,13 +20,8 @@ RUN \
 # Create folder where the user hook into our default configs
     && mkdir -p /etc/nginx/server.d/ \
     && mkdir -p /etc/nginx/location.d/ \
-# Bring php-fpm configs into a more controallable state
-    && rm /usr/local/etc/php-fpm.d/www.conf.default \
-    && mv /usr/local/etc/php-fpm.d/docker.conf /usr/local/etc/php-fpm.d/00-docker.conf \
-    && mv /usr/local/etc/php-fpm.d/www.conf /usr/local/etc/php-fpm.d/10-www.conf \
-    && mv /usr/local/etc/php-fpm.d/zz-docker.conf /usr/local/etc/php-fpm.d/20-docker.conf \
 # Install PrivateBin
-    && apk add --no-cache gnupg \
+    && apk add --no-cache gnupg curl \
     && export GNUPGHOME="$(mktemp -d)" \
     && gpg2 --list-public-keys || /bin/true \
     && curl -s https://privatebin.info/key/release.asc | gpg2 --import - \
@@ -54,14 +39,13 @@ RUN \
     && mv vendor /srv \
     && mkdir -p /srv/data \
     && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" index.php \
-    && chown -R www-data.www-data /var/www /srv/* \
+    && chown -R nobody.www-data /var/www /srv/* \
     && rm -rf "${GNUPGHOME}" /tmp/* \
-    && apk del --no-cache gnupg
+    && apk del --no-cache gnupg curl
 
 WORKDIR /var/www
 
 ADD etc/ /etc/
-ADD usr/ /usr/
 
 # mark dirs as volumes that need to be writable, allows running the container --read-only
 VOLUME /srv/data /tmp /var/tmp /run /var/log
