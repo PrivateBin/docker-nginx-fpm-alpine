@@ -2,7 +2,7 @@ FROM alpine:3.10.0
 
 MAINTAINER PrivateBin <support@privatebin.org>
 
-ENV RELEASE 1.2.1
+ENV RELEASE 1.3
 
 RUN \
 # Install dependencies
