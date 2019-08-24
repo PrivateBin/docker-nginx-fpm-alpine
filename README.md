@@ -32,6 +32,15 @@ docker run -d --restart="always" --read-only -p 8080:80 -v conf.php:/srv/cfg/con
 
 Note: The `Filesystem` data storage is supported out of the box. The image includes PDO modules for MySQL and SQLite, required for the `Database` one, but you still need to keep the /srv/data persisted for the server salt and the traffic limiter.
 
+### Timezone settings
+
+The image supports the use of the following two environment variables to adjust the timezone. This is most useful to ensure the logs show the correct local time.
+
+- `TZ`
+- `PHP_TZ`
+
+Note: The application internally handles expiration of pastes based on a UNIX timestamp that is calculated based on the timezone set during its creation. Changing the PHP_TZ will affect this and leads to earlier (if the timezone is increased) or later (if it is decreased) expiration then expected.
+
 ## Rolling your own image
 
 To reproduce the image, run:

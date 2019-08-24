@@ -1,4 +1,4 @@
-FROM alpine:3.10.0
+FROM alpine:3.10
 
 MAINTAINER PrivateBin <support@privatebin.org>
 
@@ -6,8 +6,8 @@ ENV RELEASE 1.3
 
 RUN \
 # Install dependencies
-    apk add --no-cache supervisor nginx php7-fpm php7-json php7-gd php7-opcache \
-        php7-pdo_mysql php7-pdo_pgsql \
+    apk add --no-cache supervisor tzdata nginx php7-fpm \
+        php7-json php7-gd php7-opcache php7-pdo_mysql php7-pdo_pgsql \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf \
     && rm -f /etc/nginx/conf.d/default.conf \
