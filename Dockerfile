@@ -2,33 +2,30 @@ FROM alpine:3.10
 
 MAINTAINER PrivateBin <support@privatebin.org>
 
-ENV RELEASE 1.3
+ENV RELEASE   1.3
+ENV PBURL     https://github.com/PrivateBin/PrivateBin/
+ENV S6RELEASE v1.22.1.0
+ENV S6URL     https://github.com/just-containers/s6-overlay/releases/download/
+ENV S6_READ_ONLY_ROOT 1
 
 RUN \
 # Install dependencies
-    apk add --no-cache supervisor tzdata nginx php7-fpm \
-        php7-json php7-gd php7-opcache php7-pdo_mysql php7-pdo_pgsql \
+    apk add --no-cache tzdata nginx php7-fpm php7-json php7-gd \
+        php7-opcache php7-pdo_mysql php7-pdo_pgsql \
 # Remove (some of the) default nginx config
-    && rm -f /etc/nginx.conf \
-    && rm -f /etc/nginx/conf.d/default.conf \
+    && rm -f /etc/nginx.conf /etc/nginx/conf.d/default.conf /etc/php7/php-fpm.d/www.conf \
     && rm -rf /etc/nginx/sites-* \
-    && rm -rf /var/log/nginx \
 # Ensure nginx logs, even if the config has errors, are written to stderr
-    && rm /var/lib/nginx/logs \
-    && mkdir -p /var/lib/nginx/logs \
-    && ln -s /dev/stderr /var/lib/nginx/logs/error.log \
-# Create folder where the user hook into our default configs
-    && mkdir -p /etc/nginx/server.d/ \
-    && mkdir -p /etc/nginx/location.d/ \
+    && ln -s /dev/stderr /var/log/nginx/error.log \
 # Install PrivateBin
-    && apk add --no-cache gnupg curl \
+    && apk add --no-cache gnupg curl libcap \
     && export GNUPGHOME="$(mktemp -d)" \
     && gpg2 --list-public-keys || /bin/true \
     && curl -s https://privatebin.info/key/release.asc | gpg2 --import - \
     && rm -rf /var/www/* \
     && cd /tmp \
-    && curl -Ls https://github.com/PrivateBin/PrivateBin/releases/download/${RELEASE}/PrivateBin-${RELEASE}.tar.gz.asc > PrivateBin-${RELEASE}.tar.gz.asc \
-    && curl -Ls https://github.com/PrivateBin/PrivateBin/archive/${RELEASE}.tar.gz > PrivateBin-${RELEASE}.tar.gz \
+    && curl -Ls ${PBURL}releases/download/${RELEASE}/PrivateBin-${RELEASE}.tar.gz.asc > PrivateBin-${RELEASE}.tar.gz.asc \
+    && curl -Ls ${PBURL}archive/${RELEASE}.tar.gz > PrivateBin-${RELEASE}.tar.gz \
     && gpg2 --verify PrivateBin-${RELEASE}.tar.gz.asc \
     && cd /var/www \
     && tar -xzf /tmp/PrivateBin-${RELEASE}.tar.gz --strip 1 \
@@ -39,17 +36,32 @@ RUN \
     && mv vendor /srv \
     && mkdir -p /srv/data \
     && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" index.php \
-    && chown -R nobody.www-data /var/www /srv/* \
+# Install s6 overlay for service management
+    && curl -s https://keybase.io/justcontainers/key.asc | gpg2 --import - \
+    && cd /tmp \
+    && curl -Ls ${S6URL}${S6RELEASE}/s6-overlay-amd64.tar.gz.sig > s6-overlay-amd64.tar.gz.sig \
+    && curl -Ls ${S6URL}${S6RELEASE}/s6-overlay-amd64.tar.gz > s6-overlay-amd64.tar.gz \
+    && gpg2 --verify s6-overlay-amd64.tar.gz.sig \
+    && tar -xzf s6-overlay-amd64.tar.gz -C / \
+# Support running s6 under a non-root user
+    && mkdir -p /etc/services.d/nginx/supervise /etc/services.d/php-fpm7/supervise \
+    && mkfifo /etc/services.d/nginx/supervise/control \
+    && mkfifo /etc/services.d/php-fpm7/supervise/control \
+    && mkfifo /etc/s6/services/s6-fdholderd/supervise/control \
+    && setcap 'cap_net_bind_service=+ep' /usr/sbin/nginx \
+    && chown -R nginx.www-data /var/www /srv/* /etc/services.d /etc/s6 /run \
+# Clean up
     && rm -rf "${GNUPGHOME}" /tmp/* \
-    && apk del --no-cache gnupg curl
+    && apk del gnupg curl libcap
+
+COPY etc/ /etc/
 
 WORKDIR /var/www
-
-ADD etc/ /etc/
+USER nginx:www-data
 
 # mark dirs as volumes that need to be writable, allows running the container --read-only
-VOLUME /srv/data /tmp /var/tmp /run /var/log
+VOLUME /srv/data /tmp /var/tmp/nginx /run /var/log
 
 EXPOSE 80
 
-ENTRYPOINT ["/usr/bin/supervisord","-c","/etc/supervisord.conf"]
+ENTRYPOINT ["/init"]
