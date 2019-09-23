@@ -49,7 +49,7 @@ RUN \
     && mkfifo /etc/services.d/php-fpm7/supervise/control \
     && mkfifo /etc/s6/services/s6-fdholderd/supervise/control \
     && setcap 'cap_net_bind_service=+ep' /usr/sbin/nginx \
-    && chown -R nginx.www-data /var/www /srv/* /etc/services.d /etc/s6 /run \
+    && chown -R nobody.www-data /var/lib/nginx /var/tmp/nginx /var/www /srv/* /etc/services.d /etc/s6 /run \
 # Clean up
     && rm -rf "${GNUPGHOME}" /tmp/* \
     && apk del gnupg curl libcap
@@ -57,7 +57,7 @@ RUN \
 COPY etc/ /etc/
 
 WORKDIR /var/www
-USER nginx:www-data
+USER nobody:www-data
 
 # mark dirs as volumes that need to be writable, allows running the container --read-only
 VOLUME /srv/data /tmp /var/tmp/nginx /run /var/log
