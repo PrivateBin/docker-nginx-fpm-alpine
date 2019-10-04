@@ -39,10 +39,15 @@ RUN \
 # Install s6 overlay for service management
     && curl -s https://keybase.io/justcontainers/key.asc | gpg2 --import - \
     && cd /tmp \
-    && curl -Ls ${S6URL}${S6RELEASE}/s6-overlay-amd64.tar.gz.sig > s6-overlay-amd64.tar.gz.sig \
-    && curl -Ls ${S6URL}${S6RELEASE}/s6-overlay-amd64.tar.gz > s6-overlay-amd64.tar.gz \
-    && gpg2 --verify s6-overlay-amd64.tar.gz.sig \
-    && tar -xzf s6-overlay-amd64.tar.gz -C / \
+    && S6ARCH=$(uname -m) \
+    && case ${S6ARCH} in \
+           x86_64) S6ARCH=amd64;; \
+           armv7l) S6ARCH=armhf;; \
+       esac \
+    && curl -Ls ${S6URL}${S6RELEASE}/s6-overlay-${S6ARCH}.tar.gz.sig > s6-overlay-${S6ARCH}.tar.gz.sig \
+    && curl -Ls ${S6URL}${S6RELEASE}/s6-overlay-${S6ARCH}.tar.gz > s6-overlay-${S6ARCH}.tar.gz \
+    && gpg2 --verify s6-overlay-${S6ARCH}.tar.gz.sig \
+    && tar -xzf s6-overlay-${S6ARCH}.tar.gz -C / \
 # Support running s6 under a non-root user
     && mkdir -p /etc/services.d/nginx/supervise /etc/services.d/php-fpm7/supervise \
     && mkfifo /etc/services.d/nginx/supervise/control \
