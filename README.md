@@ -15,7 +15,7 @@ docker run -d --restart="always" --read-only -p 8080:8080 -v privatebin-data:/sr
 The parameters in detail:
 
 - `-v privatebin-data:/srv/data` - replace `privatebin-data` with the path to the folder on your system, where the pastes and other service data should be persisted. This guarantees that your pastes aren't lost after you stop and restart the image or when you replace it. May be skipped if you just want to test the image.
-- `-p 8080:8080` - The Nginx webserver inside the container listens on port 8080, this parameter exposes it on your system on port 8080. Be sure to use a reverse proxy for HTTPS termination in front of it for production environments.
+- `-p 8080:8080` - The Nginx webserver inside the container listens on port 8080, this parameter exposes it on your system on port 8080. Be sure to use a reverse proxy for HTTPS termination in front of it in production environments.
 - `--read-only` - This image supports running in read-only mode. Using this reduces the attack surface slightly, since an exploit in one of the images services can't overwrite arbitrary files in the container. Only /tmp, /var/tmp, /var/run & /srv/data may be written into.
 - `-d` - launches the container in the background. You can use `docker ps` and `docker logs` to check if the container is alive and well.
 - `--restart="always"` - restart the container if it crashes, mainly useful for production setups
@@ -57,9 +57,9 @@ docker build -t privatebin/nginx-fpm-alpine .
 
 ### Behind the scenes
 
-The two processes, Nginx and php-fpm, are started by supervisord, which will also try to restart the services in case they crash.
+The two processes, Nginx and php-fpm, are started by s6 overlay.
 
-Nginx is required to serve static files and caches them, too. Requests to the index.php (which is the only PHP file exposed in the document root at /var/www) are passed on to php-fpm via a socket at /run/php-fpm.sock. All other PHP files and the data are stored under /srv.
+Nginx is required to serve static files and caches them, too. Requests to the index.php (which is the only PHP file exposed in the document root at /var/www) are passed to php-fpm via a socket at /run/php-fpm.sock. All other PHP files and the data are stored under /srv.
 
 The Nginx setup supports only HTTP, so make sure that you run a reverse proxy in front of this for HTTPS offloading and reducing the attack surface on your TLS stack. The Nginx in this image is set up to deflate/gzip text content.
 
