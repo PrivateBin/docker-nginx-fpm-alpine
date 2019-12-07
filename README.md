@@ -9,25 +9,27 @@ This repository contains the Dockerfile and resources needed to create a docker 
 Assuming you have docker successfully installed and internet access, you can fetch and run the image from the docker hub like this:
 
 ```bash
-docker run -d --restart="always" --read-only -p 8080:80 -v privatebin-data:/srv/data privatebin/nginx-fpm-alpine
+docker run -d --restart="always" --read-only -p 8080:8080 -v privatebin-data:/srv/data privatebin/nginx-fpm-alpine
 ```
 
 The parameters in detail:
 
 - `-v privatebin-data:/srv/data` - replace `privatebin-data` with the path to the folder on your system, where the pastes and other service data should be persisted. This guarantees that your pastes aren't lost after you stop and restart the image or when you replace it. May be skipped if you just want to test the image.
-- `-p 8080:80` - The Nginx webserver inside the container listens on port 80, this parameter exposes it on your system on port 8080. Be sure to use a reverse proxy for HTTPS termination in front of it for production environments.
+- `-p 8080:8080` - The Nginx webserver inside the container listens on port 8080, this parameter exposes it on your system on port 8080. Be sure to use a reverse proxy for HTTPS termination in front of it for production environments.
 - `--read-only` - This image supports running in read-only mode. Using this reduces the attack surface slightly, since an exploit in one of the images services can't overwrite arbitrary files in the container. Only /tmp, /var/tmp, /var/run & /srv/data may be written into.
 - `-d` - launches the container in the background. You can use `docker ps` and `docker logs` to check if the container is alive and well.
 - `--restart="always"` - restart the container if it crashes, mainly useful for production setups
 
 > Note that the volume mounted must be owned by UID 65534 / GID 82. If you run the container in a docker instance with "userns-remap" you need to add your subuid/subgid range to these numbers.
+> 
+> Note, too, that this image exposes the same service on port 80, for backwards compatibility with older versions of the image. To use port 80 with the current image, you either need to have a filesystem with extended attribute support so the nginx binary can be granted the capability to bind to ports below 1024 as non-root user or you need to start the image with user id 0 (root) using the parameter `-u 0`.
 
 ### Custom configuration
 
 In case you want to use a customized [conf.php](https://github.com/PrivateBin/PrivateBin/blob/master/cfg/conf.sample.php) file, for example one that has file uploads enabled or that uses a different template, add the file as a second volume:
 
 ```bash
-docker run -d --restart="always" --read-only -p 8080:80 -v conf.php:/srv/cfg/conf.php:ro -v privatebin-data:/srv/data privatebin/nginx-fpm-alpine
+docker run -d --restart="always" --read-only -p 8080:8080 -v conf.php:/srv/cfg/conf.php:ro -v privatebin-data:/srv/data privatebin/nginx-fpm-alpine
 ```
 
 Note: The `Filesystem` data storage is supported out of the box. The image includes PDO modules for MySQL, PostgreSQL and SQLite, required for the `Database` one, but you still need to keep the /srv/data persisted for the server salt and the traffic limiter.
@@ -57,8 +59,9 @@ docker build -t privatebin/nginx-fpm-alpine .
 
 The two processes, Nginx and php-fpm, are started by supervisord, which will also try to restart the services in case they crash.
 
-Nginx is required to serve static files and caches them, too. Requests to the index.php (which is the only PHP file exposed in the document root at /var/www) are passed on to php-fpm via fastCGI to port 9000. All other PHP files and the data are stored in /srv.
+Nginx is required to serve static files and caches them, too. Requests to the index.php (which is the only PHP file exposed in the document root at /var/www) are passed on to php-fpm via a socket at /run/php-fpm.sock. All other PHP files and the data are stored under /srv.
 
-The Nginx setup supports only HTTP, so make sure that you run another webserver as reverse proxy in front of this for HTTPS offloading and reducing the attack surface on your TLS stack. The Nginx in this image is set up to deflate/gzip text content.
+The Nginx setup supports only HTTP, so make sure that you run a reverse proxy in front of this for HTTPS offloading and reducing the attack surface on your TLS stack. The Nginx in this image is set up to deflate/gzip text content.
 
-During the build of the image, the opcache & GD PHP modules are compiled from source and the PrivateBin release archive is downloaded from Github. All the downloaded Alpine packages and the PrivateBin archive are validated using cryptographic signatures to ensure the have not been tempered with, before deploying them in the image.
+During the build of the image the PrivateBin release archive and the s6 overlay binaries are downloaded from Github. All the downloaded Alpine packages, s6 overlay binaries and the PrivateBin archive are validated using cryptographic signatures to ensure they have not been tempered with, before deploying them in the image.
+

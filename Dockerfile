@@ -67,6 +67,6 @@ USER nobody:www-data
 # mark dirs as volumes that need to be writable, allows running the container --read-only
 VOLUME /srv/data /tmp /var/tmp/nginx /run /var/log
 
-EXPOSE 80
+EXPOSE 80 8080
 
 ENTRYPOINT ["/init"]
