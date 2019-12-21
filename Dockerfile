@@ -51,7 +51,7 @@ RUN \
         /etc/services.d/php-fpm7/supervise/control \
         /etc/s6/services/s6-fdholderd/supervise/control \
     && setcap 'cap_net_bind_service=+ep' /usr/sbin/nginx \
-    && chown -R nobody.www-data /var/lib/nginx /var/tmp/nginx /var/www /srv/* /etc/services.d /etc/s6 /run \
+    && chown -R nobody.www-data /etc/services.d /etc/s6 /run /srv/* /var/lib/nginx /var/www \
 # Clean up
     && rm -rf "${GNUPGHOME}" /tmp/* \
     && apk del gnupg libcap
@@ -62,7 +62,7 @@ WORKDIR /var/www
 USER nobody:www-data
 
 # mark dirs as volumes that need to be writable, allows running the container --read-only
-VOLUME /srv/data /tmp /var/tmp/nginx /run /var/log
+VOLUME /run /srv/data /tmp /var/lib/nginx/tmp
 
 EXPOSE 80 8080
 
