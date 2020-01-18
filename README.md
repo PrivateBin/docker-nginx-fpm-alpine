@@ -47,6 +47,61 @@ The image supports the use of the following two environment variables to adjust 
 
 Note: The application internally handles expiration of pastes based on a UNIX timestamp that is calculated based on the timezone set during its creation. Changing the PHP_TZ will affect this and leads to earlier (if the timezone is increased) or later (if it is decreased) expiration then expected.
 
+### Kubernetes deployment
+
+Below is an example deployment for Kubernetes.
+
+```yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: privatebin-deployment
+  labels:
+    app: privatebin
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      run: privatebin
+  template:
+    metadata:
+      labels:
+        app: privatebin
+    spec:
+      initContainers:
+      - name: privatebin-volume-permissions
+        image: busybox
+        command: ['chown', '65534:82', '/mnt']
+        securityContext:
+          runAsUser: 0
+          readOnlyRootFilesystem: True
+        volumeMounts:
+        - mountPath: /mnt
+          name: privatebin-data
+          readOnly: False
+      containers:
+      - name: privatebin
+        image: privatebin/nginx-fpm-alpine:1.3.2
+        ports:
+        - containerPort: 8080
+        env:
+        - name: TZ
+          value: Antarctica/South_Pole
+        - name: PHP_TZ
+          value: Antarctica/South_Pole
+        securityContext:
+          runAsUser: 65534
+          runAsGroup: 82
+          readOnlyRootFilesystem: True
+        volumeMounts:
+        - mountPath: /srv/data
+          name: privatebin-data
+          readOnly: False
+```
+
+Note that the volume `privatebin-data` has to be a shared, persisted volume across all nodes, i.e. on an NFS share. It is required even when using a database, as some data is always stored in files (server salt, traffic limiters IP hashes, purge limiter time stamp).
+
 ## Rolling your own image
 
 To reproduce the image, run:
