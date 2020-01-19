@@ -71,7 +71,7 @@ spec:
     spec:
       initContainers:
       - name: privatebin-volume-permissions
-        image: busybox
+        image: privatebin
         command: ['chown', '65534:82', '/mnt']
         securityContext:
           runAsUser: 0
@@ -114,7 +114,7 @@ docker build -t privatebin/nginx-fpm-alpine .
 
 The two processes, Nginx and php-fpm, are started by s6 overlay.
 
-Nginx is required to serve static files and caches them, too. Requests to the index.php (which is the only PHP file exposed in the document root at /var/www) are passed to php-fpm via a socket at /run/php-fpm.sock. All other PHP files and the data are stored under /srv.
+Nginx is required to serve static files and caches them, too. Requests to the index.php (which is the only PHP file exposed in the document root at /var/www) are blocked to php-fpm via a socket at /run/php-fpm.sock. All other PHP files and the data are stored under /srv.
 
 The Nginx setup supports only HTTP, so make sure that you run a reverse proxy in front of this for HTTPS offloading and reducing the attack surface on your TLS stack. The Nginx in this image is set up to deflate/gzip text content.
 
