@@ -2,7 +2,7 @@ FROM alpine:3.11
 
 MAINTAINER PrivateBin <support@privatebin.org>
 
-ENV RELEASE   1.2.2
+ENV RELEASE   1.2.3
 ENV PBURL     https://github.com/PrivateBin/PrivateBin/
 ENV S6RELEASE v1.22.1.0
 ENV S6URL     https://github.com/just-containers/s6-overlay/releases/download/
