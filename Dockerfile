@@ -12,6 +12,7 @@ RUN \
 # Install dependencies
     apk add --no-cache gnupg libcap nginx php7-fpm php7-json php7-gd \
         php7-opcache php7-pdo_mysql php7-pdo_pgsql tzdata \
+    && apk upgrade --no-cache \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf /etc/nginx/conf.d/default.conf /etc/php7/php-fpm.d/www.conf \
     && rm -rf /etc/nginx/sites-* \
