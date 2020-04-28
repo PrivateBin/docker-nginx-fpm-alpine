@@ -10,7 +10,7 @@ ENV S6_READ_ONLY_ROOT 1
 
 RUN \
 # Install dependencies
-    apk add --no-cache gnupg libcap nginx php7-fpm php7-json php7-gd \
+    apk add --no-cache gnupg nginx php7-fpm php7-json php7-gd \
         php7-opcache php7-pdo_mysql php7-pdo_pgsql tzdata \
     && apk upgrade --no-cache \
 # Remove (some of the) default nginx config
@@ -51,12 +51,11 @@ RUN \
         /etc/services.d/nginx/supervise/control \
         /etc/services.d/php-fpm7/supervise/control \
         /etc/s6/services/s6-fdholderd/supervise/control \
-    && setcap 'cap_net_bind_service=+ep' /usr/sbin/nginx \
     && adduser nobody www-data \
     && chown -R nobody.www-data /etc/services.d /etc/s6 /run /srv/* /var/lib/nginx /var/www \
 # Clean up
     && rm -rf "${GNUPGHOME}" /tmp/* \
-    && apk del gnupg libcap
+    && apk del gnupg
 
 COPY etc/ /etc/
 
@@ -66,6 +65,6 @@ USER nobody:www-data
 # mark dirs as volumes that need to be writable, allows running the container --read-only
 VOLUME /run /srv/data /tmp /var/lib/nginx/tmp
 
-EXPOSE 80 8080
+EXPOSE 8080
 
 ENTRYPOINT ["/init"]
