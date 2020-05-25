@@ -63,7 +63,7 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-      run: privatebin
+      app: privatebin
   template:
     metadata:
       labels:
@@ -82,7 +82,7 @@ spec:
           readOnly: False
       containers:
       - name: privatebin
-        image: privatebin/nginx-fpm-alpine:1.3.3
+        image: privatebin/nginx-fpm-alpine:1.3.4
         ports:
         - containerPort: 8080
         env:
