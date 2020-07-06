@@ -1,0 +1,45 @@
+name: Deploy multi-architecture Docker images for privatebin with buildx
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # everyday at midnight UTC
+  pull_request:
+    branches: master
+  push:
+    branches: master
+
+jobs:
+  buildx:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Prepare
+        id: prepare
+        run: |
+          IMAGE=privatebin/nginx-fpm-alpine
+          VERSION=${GITHUB_REF##*/}
+          [ "${{ github.event_name }}" = "schedule" ] && VERSION=nightly
+          echo ::set-output name=buildx_args::--tag ${IMAGE}:latest \
+            --tag ${IMAGE}:${VERSION} \
+            --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/386,linux/ppc64le .
+      - name: Set up Docker Buildx
+        uses: crazy-max/ghaction-docker-buildx@v3
+      - name: Docker Buildx (build)
+        run: |
+          docker buildx build --no-cache --pull --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
+      - name: Docker Login
+        if: success() && github.event_name != 'pull_request' && (github.ref != "refs/heads/master" || github.event_name == "schedule")
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          printenv DOCKER_PASSWORD | docker login --username "${DOCKER_USERNAME}" --password-stdin
+      - name: Docker Buildx (push)
+        if: success() && github.event_name != 'pull_request' && (github.ref != "refs/heads/master" || github.event_name == "schedule")
+        run: |
+          docker buildx build --output "type=image,push=true" ${{ steps.prepare.outputs.buildx_args }}
+      - name: Cleanup
+        if: always() && github.event_name != 'pull_request' && (github.ref != "refs/heads/master" || github.event_name == "schedule")
+        run: |
+          rm -f ${HOME}/.docker/config.json
