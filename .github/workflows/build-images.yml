@@ -29,17 +29,17 @@ jobs:
         run: |
           docker buildx build --no-cache --pull --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
       - name: Docker Login
-        if: success() && github.event_name != 'pull_request' && (github.ref != "refs/heads/master" || github.event_name == "schedule")
+        if: success() && github.event_name != 'pull_request' && (github.ref != 'refs/heads/master' || github.event_name == 'schedule')
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           printenv DOCKER_PASSWORD | docker login --username "${DOCKER_USERNAME}" --password-stdin
       - name: Docker Buildx (push)
-        if: success() && github.event_name != 'pull_request' && (github.ref != "refs/heads/master" || github.event_name == "schedule")
+        if: success() && github.event_name != 'pull_request' && (github.ref != 'refs/heads/master' || github.event_name == 'schedule')
         run: |
           docker buildx build --output "type=image,push=true" ${{ steps.prepare.outputs.buildx_args }}
       - name: Cleanup
-        if: always() && github.event_name != 'pull_request' && (github.ref != "refs/heads/master" || github.event_name == "schedule")
+        if: always() && github.event_name != 'pull_request' && (github.ref != 'refs/heads/master' || github.event_name == 'schedule')
         run: |
           rm -f ${HOME}/.docker/config.json
