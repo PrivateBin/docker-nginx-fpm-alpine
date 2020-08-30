@@ -71,8 +71,8 @@ spec:
     spec:
       initContainers:
       - name: privatebin-volume-permissions
-        image: busybox
-        command: ['chown', '65534:82', '/mnt']
+        image: privatebin/chown:1.31.1-musl-1.1.24-r9
+        command: ['65534:82', '/mnt']
         securityContext:
           runAsUser: 0
           readOnlyRootFilesystem: True
