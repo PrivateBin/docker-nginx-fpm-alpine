@@ -9,12 +9,12 @@ This repository contains the Dockerfile and resources needed to create a docker 
 Assuming you have docker successfully installed and internet access, you can fetch and run the image from the docker hub like this:
 
 ```bash
-docker run -d --restart="always" --read-only -p 8080:8080 -v privatebin-data:/srv/data privatebin/nginx-fpm-alpine
+docker run -d --restart="always" --read-only -p 8080:8080 -v $PWD/privatebin-data:/srv/data privatebin/nginx-fpm-alpine
 ```
 
 The parameters in detail:
 
-- `-v privatebin-data:/srv/data` - replace `privatebin-data` with the path to the folder on your system, where the pastes and other service data should be persisted. This guarantees that your pastes aren't lost after you stop and restart the image or when you replace it. May be skipped if you just want to test the image.
+- `-v $PWD/privatebin-data:/srv/data` - replace `$PWD/privatebin-data` with the path to the folder on your system, where the pastes and other service data should be persisted. This guarantees that your pastes aren't lost after you stop and restart the image or when you replace it. May be skipped if you just want to test the image.
 - `-p 8080:8080` - The Nginx webserver inside the container listens on port 8080, this parameter exposes it on your system on port 8080. Be sure to use a reverse proxy for HTTPS termination in front of it in production environments.
 - `--read-only` - This image supports running in read-only mode. Using this reduces the attack surface slightly, since an exploit in one of the images services can't overwrite arbitrary files in the container. Only /tmp, /var/tmp, /var/run & /srv/data may be written into.
 - `-d` - launches the container in the background. You can use `docker ps` and `docker logs` to check if the container is alive and well.
@@ -29,7 +29,7 @@ The parameters in detail:
 In case you want to use a customized [conf.php](https://github.com/PrivateBin/PrivateBin/blob/master/cfg/conf.sample.php) file, for example one that has file uploads enabled or that uses a different template, add the file as a second volume:
 
 ```bash
-docker run -d --restart="always" --read-only -p 8080:8080 -v conf.php:/srv/cfg/conf.php:ro -v privatebin-data:/srv/data privatebin/nginx-fpm-alpine
+docker run -d --restart="always" --read-only -p 8080:8080 -v $PWD/conf.php:/srv/cfg/conf.php:ro -v $PWD/privatebin-data:/srv/data privatebin/nginx-fpm-alpine
 ```
 
 Note: The `Filesystem` data storage is supported out of the box. The image includes PDO modules for MySQL, PostgreSQL and SQLite, required for the `Database` one, but you still need to keep the /srv/data persisted for the server salt and the traffic limiter.
