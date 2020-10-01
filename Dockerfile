@@ -60,7 +60,8 @@ RUN \
 COPY etc/ /etc/
 
 WORKDIR /var/www
-USER nobody:www-data
+# user nobody, group www-data
+USER 65534:82
 
 # mark dirs as volumes that need to be writable, allows running the container --read-only
 VOLUME /run /srv/data /tmp /var/lib/nginx/tmp
