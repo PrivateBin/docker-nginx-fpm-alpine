@@ -75,7 +75,7 @@ spec:
         command: ['65534:82', '/mnt']
         securityContext:
           runAsUser: 0
-          readOnlyRootFilesystem: True
+          readOnlyRootFilesystem: true
         volumeMounts:
         - mountPath: /mnt
           name: privatebin-data
@@ -93,7 +93,9 @@ spec:
         securityContext:
           runAsUser: 65534
           runAsGroup: 82
-          readOnlyRootFilesystem: True
+          readOnlyRootFilesystem: true
+          privileged: false
+          allowPrivilegeEscalation: false
         livenessProbe:
           httpGet:
             path: /
