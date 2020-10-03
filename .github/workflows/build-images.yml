@@ -19,16 +19,22 @@ jobs:
         id: prepare
         run: |
           IMAGE=privatebin/nginx-fpm-alpine
+          PLATFORMS=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/386,linux/ppc64le
           VERSION=${GITHUB_REF##*/}
           [ "${{ github.event_name }}" = "schedule" ] && VERSION=nightly
           echo ::set-output name=buildx_args::--tag ${IMAGE}:latest \
             --tag ${IMAGE}:${VERSION} \
-            --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/386,linux/ppc64le .
+            --platform ${PLATFORMS} .
       - name: Set up Docker Buildx
-        uses: crazy-max/ghaction-docker-buildx@v3
-      - name: Docker Buildx (build)
+        uses: docker/setup-buildx-action@v1
+        id: buildx
+        with:
+          install: true
+      - name: Available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+      - name: Docker Build
         run: |
-          docker buildx build --no-cache --pull --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
+          docker build --no-cache --pull --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
       - name: Docker Login
         if: success() && github.event_name != 'pull_request' && (github.ref != 'refs/heads/master' || github.event_name == 'schedule')
         env:
@@ -36,10 +42,10 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           printenv DOCKER_PASSWORD | docker login --username "${DOCKER_USERNAME}" --password-stdin
-      - name: Docker Buildx (push)
+      - name: Docker Push
         if: success() && github.event_name != 'pull_request' && (github.ref != 'refs/heads/master' || github.event_name == 'schedule')
         run: |
-          docker buildx build --output "type=image,push=true" ${{ steps.prepare.outputs.buildx_args }}
+          docker build --output "type=image,push=true" ${{ steps.prepare.outputs.buildx_args }}
       - name: Cleanup
         if: always() && github.event_name != 'pull_request' && (github.ref != 'refs/heads/master' || github.event_name == 'schedule')
         run: |
