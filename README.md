@@ -94,6 +94,14 @@ spec:
           runAsUser: 65534
           runAsGroup: 82
           readOnlyRootFilesystem: True
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
         volumeMounts:
         - mountPath: /srv/data
           name: privatebin-data
