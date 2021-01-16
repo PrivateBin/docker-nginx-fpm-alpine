@@ -4,7 +4,7 @@ MAINTAINER PrivateBin <support@privatebin.org>
 
 ENV RELEASE   1.3.4
 ENV PBURL     https://github.com/PrivateBin/PrivateBin/
-ENV S6RELEASE v2.0.0.1
+ENV S6RELEASE v2.1.0.2
 ENV S6URL     https://github.com/just-containers/s6-overlay/releases/download/
 ENV S6_READ_ONLY_ROOT 1
 
@@ -50,7 +50,6 @@ RUN \
     && mkfifo \
         /etc/services.d/nginx/supervise/control \
         /etc/services.d/php-fpm7/supervise/control \
-        /etc/s6/services/s6-fdholderd/supervise/control \
     && adduser nobody www-data \
     && chown -R nobody.www-data /etc/services.d /etc/s6 /run /srv/* /var/lib/nginx /var/www \
 # Clean up
