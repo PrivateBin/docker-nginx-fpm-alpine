@@ -10,11 +10,11 @@ ENV S6_READ_ONLY_ROOT 1
 
 RUN \
 # Install dependencies
-    apk add --no-cache gnupg nginx php7-fpm php7-json php7-gd \
-        php7-opcache php7-pdo_mysql php7-pdo_pgsql tzdata \
+    apk add --no-cache gnupg nginx php8-fpm php8-json php8-gd \
+        php8-opcache php8-pdo_mysql php8-pdo_pgsql tzdata \
     && apk upgrade --no-cache \
 # Remove (some of the) default nginx config
-    && rm -f /etc/nginx.conf /etc/nginx/conf.d/default.conf /etc/php7/php-fpm.d/www.conf \
+    && rm -f /etc/nginx.conf /etc/nginx/conf.d/default.conf /etc/php8/php-fpm.d/www.conf \
     && rm -rf /etc/nginx/sites-* \
 # Ensure nginx logs, even if the config has errors, are written to stderr
     && ln -s /dev/stderr /var/log/nginx/error.log \
@@ -46,10 +46,10 @@ RUN \
     && gpg2 --verify s6-overlay-${S6ARCH}.tar.gz.sig \
     && tar -xzf s6-overlay-${S6ARCH}.tar.gz -C / \
 # Support running s6 under a non-root user
-    && mkdir -p /etc/services.d/nginx/supervise /etc/services.d/php-fpm7/supervise \
+    && mkdir -p /etc/services.d/nginx/supervise /etc/services.d/php-fpm8/supervise \
     && mkfifo \
         /etc/services.d/nginx/supervise/control \
-        /etc/services.d/php-fpm7/supervise/control \
+        /etc/services.d/php-fpm8/supervise/control \
     && adduser nobody www-data \
     && chown -R nobody.www-data /etc/services.d /etc/s6 /run /srv/* /var/lib/nginx /var/www \
 # Clean up
