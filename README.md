@@ -71,7 +71,7 @@ spec:
     spec:
       initContainers:
       - name: privatebin-volume-permissions
-        image: privatebin/chown:1.31.1-musl-1.1.24-r9
+        image: privatebin/chown:1.33.0-musl-1.2.2-r0
         command: ['65534:82', '/mnt']
         securityContext:
           runAsUser: 0
