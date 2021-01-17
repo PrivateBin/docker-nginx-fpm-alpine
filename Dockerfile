@@ -4,14 +4,12 @@ MAINTAINER PrivateBin <support@privatebin.org>
 
 ENV RELEASE   1.3.4
 ENV PBURL     https://github.com/PrivateBin/PrivateBin/
-ENV S6RELEASE v2.1.0.2
-ENV S6URL     https://github.com/just-containers/s6-overlay/releases/download/
 ENV S6_READ_ONLY_ROOT 1
 
 RUN \
 # Install dependencies
     apk add --no-cache gnupg nginx php8-fpm php8-json php8-gd \
-        php8-opcache php8-pdo_mysql php8-pdo_pgsql tzdata \
+        php8-opcache php8-pdo_mysql php8-pdo_pgsql s6-overlay tzdata \
     && apk upgrade --no-cache \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf /etc/nginx/conf.d/default.conf /etc/php8/php-fpm.d/www.conf \
@@ -33,25 +31,13 @@ RUN \
     && mv cfg lib tpl vendor /srv \
     && mkdir -p /srv/data \
     && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" index.php \
-# Install s6 overlay for service management
-    && wget -qO - https://keybase.io/justcontainers/key.asc | gpg2 --import - \
-    && cd /tmp \
-    && S6ARCH=$(uname -m) \
-    && case ${S6ARCH} in \
-           x86_64) S6ARCH=amd64;; \
-           armv7l) S6ARCH=armhf;; \
-       esac \
-    && wget -q ${S6URL}${S6RELEASE}/s6-overlay-${S6ARCH}.tar.gz.sig \
-    && wget -q ${S6URL}${S6RELEASE}/s6-overlay-${S6ARCH}.tar.gz \
-    && gpg2 --verify s6-overlay-${S6ARCH}.tar.gz.sig \
-    && tar -xzf s6-overlay-${S6ARCH}.tar.gz -C / \
 # Support running s6 under a non-root user
-    && mkdir -p /etc/services.d/nginx/supervise /etc/services.d/php-fpm8/supervise \
+    && mkdir -p /etc/s6/services/nginx/supervise /etc/s6/services/php-fpm8/supervise \
     && mkfifo \
-        /etc/services.d/nginx/supervise/control \
-        /etc/services.d/php-fpm8/supervise/control \
+        /etc/s6/services/nginx/supervise/control \
+        /etc/s6/services/php-fpm8/supervise/control \
     && adduser nobody www-data \
-    && chown -R nobody.www-data /etc/services.d /etc/s6 /run /srv/* /var/lib/nginx /var/www \
+    && chown -R nobody.www-data /etc/s6 /run /srv/* /var/lib/nginx /var/www \
 # Clean up
     && rm -rf "${GNUPGHOME}" /tmp/* \
     && apk del gnupg
