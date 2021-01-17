@@ -12,7 +12,7 @@ RUN \
         php8-opcache php8-pdo_mysql php8-pdo_pgsql s6-overlay tzdata \
     && apk upgrade --no-cache \
 # Remove (some of the) default nginx config
-    && rm -f /etc/nginx.conf /etc/nginx/conf.d/default.conf /etc/php8/php-fpm.d/www.conf \
+    && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php8/php-fpm.d/www.conf \
     && rm -rf /etc/nginx/sites-* \
 # Ensure nginx logs, even if the config has errors, are written to stderr
     && ln -s /dev/stderr /var/log/nginx/error.log \
