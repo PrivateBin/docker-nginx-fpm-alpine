@@ -35,7 +35,7 @@ jobs:
           # GitHub Token to create issues in the repository
           #token: # optional, default is ${{ github.token }}
           # Target URL
-          target: localhost:8080 
+          target: http://localhost:8080 
           # Relative path of the ZAP configuration file
           #rules_file_name: # optional
           # The Docker file to be executed
