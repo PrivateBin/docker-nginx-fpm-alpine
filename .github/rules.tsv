@@ -1,0 +1,22 @@
+# the image is intended for being used behind a reverse-proxy, so TLS termination is already done
+10106	IGNORE	(HTTP Only Site)
+# the code is open-source, no special information here
+10027	IGNORE	(Information Disclosure - Suspicious Comments)
+40034	IGNORE	(.env Information Leak)
+# why would we care about timestamps?
+10096	IGNORE	(Timestamp Disclosure - Unix)
+# we have no authentication so CSRF is not possible, the detected password form is only used interactively
+10202	IGNORE	(Absence of Anti-CSRF Tokens)
+20012	IGNORE	(Anti-CSRF Tokens Check)
+#
+#
+# false-positives
+#
+# we certainly don't use ASP.NET
+# reported: https://github.com/zaproxy/zaproxy/issues/6517
+40029	IGNORE	(Trace.axd Information Leak)
+# this is nginx, not Apache
+# reported: https://github.com/zaproxy/zaproxy/issues/6516
+10053	IGNORE	(Apache Range Header DoS (CVE-2011-3192))
+# again we return 200 to some strange URL
+90034	IGNORE	(Cloud Metadata Potentially Exposed)
