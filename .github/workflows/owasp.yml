@@ -42,7 +42,7 @@ jobs:
           # Target URL
           target: http://localhost:8080 
           # Relative path of the ZAP configuration file
-          #rules_file_name: # optional
+          rules_file_name: ".github/rules.tsv" # optional
           # The Docker file to be executed
           #docker_name: # default is owasp/zap2docker-stable
           # Additional command line options
