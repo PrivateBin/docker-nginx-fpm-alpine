@@ -24,6 +24,11 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: master
+    
       # Runs a single command using the runners shell
       - name: Pull and start docker
         run: docker run -d --read-only -p 8080:8080 privatebin/nginx-fpm-alpine
