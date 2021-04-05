@@ -2,7 +2,7 @@ FROM alpine:3.13
 
 MAINTAINER PrivateBin <support@privatebin.org>
 
-ENV RELEASE   1.3.4
+ENV RELEASE   1.3.5
 ENV PBURL     https://github.com/PrivateBin/PrivateBin/
 ENV S6_READ_ONLY_ROOT 1
 
