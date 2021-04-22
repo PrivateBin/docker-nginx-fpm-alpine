@@ -1,13 +1,19 @@
+# connect-src wildcard is required for the API to work when called from external instances
+10055	IGNORE	(CSP: Wildcard Directive)
 # the image is intended for being used behind a reverse-proxy, so TLS termination is already done
 10106	IGNORE	(HTTP Only Site)
 # the code is open-source, no special information here
 10027	IGNORE	(Information Disclosure - Suspicious Comments)
 40034	IGNORE	(.env Information Leak)
-# why would we care about timestamps?
+# it doesn't seem to like that we configured our nginx to not respond to directory paths
+10104	IGNORE	(User Agent Fuzzer)
+# the supposed timestamps are actually rgba values in hex notation or the fractional part of percentages in CSS files
 10096	IGNORE	(Timestamp Disclosure - Unix)
 # we have no authentication so CSRF is not possible, the detected password form is only used interactively
 10202	IGNORE	(Absence of Anti-CSRF Tokens)
 20012	IGNORE	(Anti-CSRF Tokens Check)
+# glad we are considered modern
+10109	IGNORE	(Modern Web Application)
 #
 #
 # false-positives
