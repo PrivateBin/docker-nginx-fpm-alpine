@@ -36,8 +36,8 @@ RUN \
     && mkfifo \
         /etc/s6/services/nginx/supervise/control \
         /etc/s6/services/php-fpm8/supervise/control \
-    && adduser nobody www-data \
-    && chown -R nobody.www-data /etc/s6 /run /srv/* /var/lib/nginx /var/www \
+    && chown -R 65534:82 /etc/s6 /run /srv/* /var/lib/nginx /var/www \
+    && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp \
 # Clean up
     && rm -rf "${GNUPGHOME}" /tmp/* \
     && apk del gnupg
