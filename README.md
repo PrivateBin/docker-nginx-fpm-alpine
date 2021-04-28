@@ -82,7 +82,7 @@ spec:
           readOnly: False
       containers:
       - name: privatebin
-        image: privatebin/nginx-fpm-alpine:1.3.4
+        image: privatebin/nginx-fpm-alpine:1.3.5
         ports:
         - containerPort: 8080
         env:
