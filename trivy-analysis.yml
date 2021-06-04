@@ -1,5 +1,4 @@
 name: build
-
 on:
   push:
     branches: [ master ]
@@ -11,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Trivy analysis
     runs-on: "ubuntu-18.04"
     steps:
       - name: Checkout code
