@@ -1,2 +1,3 @@
 #!/usr/bin/execlineb -P
+if { test -S /var/run/php-fpm.sock }
 /usr/sbin/nginx
