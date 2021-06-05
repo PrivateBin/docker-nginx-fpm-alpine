@@ -1,2 +1,9 @@
 #!/usr/bin/execlineb -P
-/usr/sbin/nginx
+forx -o 127 timer { 0 1 2 3 4 5 6 7 8 9 }
+    ifelse {
+        test -S /var/run/php-fpm.sock
+    } {
+        /usr/sbin/nginx
+    }
+        foreground { sleep 1 }
+        exit 127
