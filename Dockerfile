@@ -8,8 +8,9 @@ ENV S6_READ_ONLY_ROOT 1
 
 RUN \
 # Install dependencies
-    apk add --no-cache gnupg nginx php8-fpm php8-json php8-gd \
-        php8-opcache php8-pdo_mysql php8-pdo_pgsql s6-overlay tzdata \
+    apk add --no-cache gnupg nginx php8 php8-curl php8-fpm php8-json php8-gd \
+        php8-mbstring php8-opcache php8-pdo_mysql php8-pdo_pgsql php8-phar \
+        s6-overlay tzdata \
     && apk upgrade --no-cache \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php8/php-fpm.d/www.conf \
@@ -25,9 +26,17 @@ RUN \
     && wget -qO ${RELEASE}.tar.gz.asc ${PBURL}releases/download/${RELEASE}/PrivateBin-${RELEASE}.tar.gz.asc \
     && wget -q ${PBURL}archive/${RELEASE}.tar.gz \
     && gpg2 --verify ${RELEASE}.tar.gz.asc \
+    && wget -qO composer-setup.php https://getcomposer.org/installer \
+    && ln -s $(which php8) /usr/local/bin/php \
+    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
     && cd /var/www \
     && tar -xzf /tmp/${RELEASE}.tar.gz --strip 1 \
-    && rm *.md cfg/conf.sample.php \
+    && wget -q $(echo ${PBURL} | sed s/github.com/raw.githubusercontent.com/)${RELEASE}/composer.json \
+    && wget -q $(echo ${PBURL} | sed s/github.com/raw.githubusercontent.com/)${RELEASE}/composer.lock \
+    && composer remove --dev --no-update phpunit/phpunit \
+    && composer require --no-update google/cloud-storage \
+    && composer update --no-dev --optimize-autoloader \
+    && rm *.md cfg/conf.sample.php composer.* /usr/local/bin/* \
     && mv cfg lib tpl vendor /srv \
     && mkdir -p /srv/data \
     && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" index.php \
@@ -40,7 +49,7 @@ RUN \
     && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp \
 # Clean up
     && rm -rf "${GNUPGHOME}" /tmp/* \
-    && apk del gnupg
+    && apk del gnupg php8 php8-curl php8-mbstring php8-phar
 
 COPY etc/ /etc/
 
