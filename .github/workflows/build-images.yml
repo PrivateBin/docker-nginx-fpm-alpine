@@ -15,50 +15,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Prepare
-        id: prepare
-        run: |
-          IMAGE=privatebin/nginx-fpm-alpine
-          QEMU_PLATFORMS=linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le
-          VERSION=${GITHUB_REF##*/}
-          [ "${{ github.event_name }}" = "schedule" ] && VERSION=nightly
-          echo ::set-output name=buildx_args::--tag ${IMAGE}:latest \
-            --tag ${IMAGE}:${VERSION} --tag ${IMAGE}:${VERSION%%-*} \
-            --platform linux/amd64,linux/386,${QEMU_PLATFORMS} .
-          echo ::set-output name=buildx_edge_args::--tag ${IMAGE}:edge \
-            --platform linux/amd64,linux/386,${QEMU_PLATFORMS} -f Dockerfile-edge .
-          echo ::set-output name=qemu_platforms::${QEMU_PLATFORMS}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
         with:
-          platforms: ${{ steps.prepare.outputs.qemu_platforms }}
+          platforms: linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
         with:
           install: true
-      - name: Docker Build (latest)
-        run: |
-          docker build --no-cache --pull --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_args }}
-      - name: Docker Build (edge)
-        run: |
-          sed 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile-edge
-          docker build --no-cache --pull --output "type=image,push=false" ${{ steps.prepare.outputs.buildx_edge_args }}
-      - name: Docker Login
-        if: success() && github.event_name != 'pull_request' && (github.ref != 'refs/heads/master' || github.event_name == 'schedule')
+      - name: Docker Build
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          printenv DOCKER_PASSWORD | docker login --username "${DOCKER_USERNAME}" --password-stdin
-      - name: Docker Push (latest)
-        if: success() && github.event_name != 'pull_request' && (github.ref != 'refs/heads/master' || github.event_name == 'schedule')
-        run: |
-          docker build --output "type=image,push=true" ${{ steps.prepare.outputs.buildx_args }}
-      - name: Docker Push (edge)
-        if: success() && github.event_name != 'pull_request' && (github.ref != 'refs/heads/master' || github.event_name == 'schedule')
-        run: |
-          docker build --output "type=image,push=true" ${{ steps.prepare.outputs.buildx_edge_args }}
-      - name: Cleanup
-        if: always() && github.event_name != 'pull_request' && (github.ref != 'refs/heads/master' || github.event_name == 'schedule')
-        run: |
-          rm -f ${HOME}/.docker/config.json
+        run: ./buildx.sh ${{ github.event_name }}
