@@ -22,7 +22,7 @@ sed 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile-edge
 docker build --no-cache --pull --output "type=image,push=false" ${BUILDX_EDGE_ARGS}
 
 # push cached images
-if [ "${EVENT}" != "pull_request"] && ([ "${GITHUB_REF}" != "refs/heads/master" ] || [ "${EVENT}" = "schedule"])
+if [ "${EVENT}" != "pull_request" ] && ([ "${GITHUB_REF}" != "refs/heads/master" ] || [ "${EVENT}" = "schedule" ])
 then
     printenv DOCKER_PASSWORD | docker login --username "${DOCKER_USERNAME}" --password-stdin
     docker build --output "type=image,push=true" ${BUILDX_ARGS}
