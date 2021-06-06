@@ -25,7 +25,6 @@ jobs:
           install: true
       - name: Docker Build
         env:
-          IMAGE: privatebin/nginx-fpm-alpine
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: ./buildx.sh ${{ github.event_name }}
