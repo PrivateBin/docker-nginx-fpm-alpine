@@ -36,7 +36,7 @@ Note: The `Filesystem` data storage is supported out of the box. The image inclu
 
 ### Adjusting nginx or php-fpm settings
 
-You can attach your own `php.ini` or nginx configuration files to the folders `/etc/php7/conf.d/` and `/etc/nginx/conf.d/` respectively. This would for example let you adjust the maximum size these two services accept for file uploads, if you need more then the default 10 MiB.
+You can attach your own `php.ini` or nginx configuration files to the folders `/etc/php8/conf.d/` and `/etc/nginx/conf.d/` respectively. This would for example let you adjust the maximum size these two services accept for file uploads, if you need more then the default 10 MiB.
 
 ### Timezone settings
 
