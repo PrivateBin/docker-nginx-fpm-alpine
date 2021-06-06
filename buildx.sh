@@ -10,11 +10,11 @@ VERSION=${GITHUB_REF##*/}
 EVENT=$1
 [ "${EVENT}" = "schedule" ] && VERSION=nightly
 
-BUILDX_ARGS=--tag ${IMAGE}:latest \
+BUILDX_ARGS="--tag ${IMAGE}:latest \
 --tag ${IMAGE}:${VERSION} --tag ${IMAGE}:${VERSION%%-*} \
---platform ${QEMU_PLATFORMS} .
-BUILDX_EDGE_ARGS=--tag ${IMAGE}:edge \
---platform ${QEMU_PLATFORMS} -f Dockerfile-edge .
+--platform ${QEMU_PLATFORMS} ."
+BUILDX_EDGE_ARGS="--tag ${IMAGE}:edge \
+--platform ${QEMU_PLATFORMS} -f Dockerfile-edge ."
 
 # build images
 docker build --no-cache --pull --output "type=image,push=false" ${BUILDX_ARGS}
