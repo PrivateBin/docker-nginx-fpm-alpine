@@ -5,7 +5,7 @@
 set -euxo pipefail
 
 IMAGE=privatebin/nginx-fpm-alpine
-QEMU_PLATFORMS=linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64
+QEMU_PLATFORMS=linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le
 VERSION=${GITHUB_REF##*/}
 EVENT=$1
 [ "${EVENT}" = "schedule" ] && VERSION=nightly
