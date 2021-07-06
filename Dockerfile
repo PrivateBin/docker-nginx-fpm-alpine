@@ -12,7 +12,7 @@ RUN \
 # Install dependencies
     apk add --no-cache gnupg nginx php8 php8-curl php8-fpm php8-json php8-gd \
         php8-mbstring php8-opcache php8-pdo_mysql php8-pdo_pgsql php8-phar \
-        s6-overlay tzdata \
+        s6-overlay tzdata git \
     && apk upgrade --no-cache \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php8/php-fpm.d/www.conf \
@@ -32,7 +32,8 @@ RUN \
          && gpg2 --verify ${RELEASE}.tar.gz.asc ; \
        else \
          echo "getting tarball for ${RELEASE}"; \
-         wget -qO ${RELEASE}.tar.gz ${PBURL}tarball/${RELEASE}; \
+         git clone ${PBURL%%/}.git -b ${RELEASE}; \
+         (cd $(basename ${PBURL}) && git archive --prefix ${RELEASE}/ --format tgz ${RELEASE} > /tmp/${RELEASE}.tar.gz); \
        fi \
     && wget -qO composer-setup.php https://getcomposer.org/installer \
     && ln -s $(which php8) /usr/local/bin/php \
@@ -57,7 +58,7 @@ RUN \
     && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp \
 # Clean up
     && rm -rf "${GNUPGHOME}" /tmp/* \
-    && apk del gnupg php8 php8-curl php8-mbstring php8-phar
+    && apk del gnupg php8 php8-curl php8-mbstring php8-phar git
 
 COPY etc/ /etc/
 
