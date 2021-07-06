@@ -9,8 +9,8 @@ QEMU_PLATFORMS=linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux
 VERSION=${GITHUB_REF##*/}
 EVENT=$1
 if [ "${EVENT}" = "schedule" ]; then
-   VERSION=nightly
    RELEASE_ARG="--build-arg RELEASE=$VERSION"
+   VERSION=nightly
 else
    RELEASE_ARG=""
 fi
