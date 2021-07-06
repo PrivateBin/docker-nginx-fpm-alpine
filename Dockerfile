@@ -1,8 +1,9 @@
 FROM alpine:3.14
+ARG RELEASE=1.3.5
 
 MAINTAINER PrivateBin <support@privatebin.org>
 
-ENV RELEASE   1.3.5
+ENV RELEASE ${RELEASE}
 ENV PBURL     https://github.com/PrivateBin/PrivateBin/
 ENV S6_READ_ONLY_ROOT 1
 ENV CONFIG_PATH       /srv/cfg
@@ -24,9 +25,15 @@ RUN \
     && wget -qO - https://privatebin.info/key/release.asc | gpg2 --import - \
     && rm -rf /var/www/* \
     && cd /tmp \
-    && wget -qO ${RELEASE}.tar.gz.asc ${PBURL}releases/download/${RELEASE}/PrivateBin-${RELEASE}.tar.gz.asc \
-    && wget -q ${PBURL}archive/${RELEASE}.tar.gz \
-    && gpg2 --verify ${RELEASE}.tar.gz.asc \
+    && if expr "${RELEASE}" : '[0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}$' >/dev/null ; then \
+         echo "getting release ${RELEASE}"; \
+         wget -qO ${RELEASE}.tar.gz.asc ${PBURL}releases/download/${RELEASE}/PrivateBin-${RELEASE}.tar.gz.asc \
+         && wget -q ${PBURL}archive/${RELEASE}.tar.gz \
+         && gpg2 --verify ${RELEASE}.tar.gz.asc ; \
+       else \
+         echo "getting tarball for ${RELEASE}"; \
+         wget -qO ${RELEASE}.tar.gz ${PBURL}tarball/${RELEASE}; \
+       fi \
     && wget -qO composer-setup.php https://getcomposer.org/installer \
     && ln -s $(which php8) /usr/local/bin/php \
     && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \

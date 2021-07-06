@@ -8,12 +8,17 @@ IMAGE=privatebin/nginx-fpm-alpine
 QEMU_PLATFORMS=linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le
 VERSION=${GITHUB_REF##*/}
 EVENT=$1
-[ "${EVENT}" = "schedule" ] && VERSION=nightly
+if [ "${EVENT}" = "schedule" ]; then
+   VERSION=nightly
+   RELEASE_ARG="--build-arg RELEASE=$VERSION"
+else
+   RELEASE_ARG=""
+fi
 
-BUILDX_ARGS="--tag ${IMAGE}:latest \
+BUILDX_ARGS="${RELEASE_ARG} --tag ${IMAGE}:latest \
 --tag ${IMAGE}:${VERSION} --tag ${IMAGE}:${VERSION%%-*} \
 --platform ${QEMU_PLATFORMS} ."
-BUILDX_EDGE_ARGS="--tag ${IMAGE}:edge \
+BUILDX_EDGE_ARGS="${RELEASE_ARG} --tag ${IMAGE}:edge \
 --platform ${QEMU_PLATFORMS} -f Dockerfile-edge ."
 
 # build images
@@ -29,4 +34,3 @@ then
     docker build --output "type=image,push=true" ${BUILDX_EDGE_ARGS}
     rm -f ${HOME}/.docker/config.json
 fi
-
