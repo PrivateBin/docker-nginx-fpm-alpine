@@ -5,6 +5,7 @@ MAINTAINER PrivateBin <support@privatebin.org>
 ENV RELEASE   1.3.5
 ENV PBURL     https://github.com/PrivateBin/PrivateBin/
 ENV S6_READ_ONLY_ROOT 1
+ENV CONFIG_PATH       /srv/cfg
 
 RUN \
 # Install dependencies
