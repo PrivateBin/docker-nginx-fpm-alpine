@@ -4,29 +4,68 @@
 # accessing an uninitialized variable and print commands before executing them
 set -euxo pipefail
 
-IMAGE=privatebin/nginx-fpm-alpine
-QEMU_PLATFORMS=linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le
-VERSION=${GITHUB_REF##*/}
 EVENT=$1
-[ "${EVENT}" = "schedule" ] && VERSION=nightly
+VERSION=${GITHUB_REF##*/}
 
-BUILDX_ARGS="--tag ${IMAGE}:latest \
---tag ${IMAGE}:${VERSION} --tag ${IMAGE}:${VERSION%%-*} \
---platform ${QEMU_PLATFORMS} ."
-BUILDX_EDGE_ARGS="--tag ${IMAGE}:edge \
---platform ${QEMU_PLATFORMS} -f Dockerfile-edge ."
 
-# build images
-docker build --no-cache --pull --output "type=image,push=false" ${BUILDX_ARGS}
-sed 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile-edge
-docker build --no-cache --pull --output "type=image,push=false" ${BUILDX_EDGE_ARGS}
+build_image() {
+   local push build_args
+   push=$1; shift 1;
+   build_args="$@"
 
-# push cached images
-if [ "${EVENT}" != "pull_request" ] && ([ "${GITHUB_REF}" != "refs/heads/master" ] || [ "${EVENT}" = "schedule" ])
-then
-    printenv DOCKER_PASSWORD | docker login --username "${DOCKER_USERNAME}" --password-stdin
-    docker build --output "type=image,push=true" ${BUILDX_ARGS}
-    docker build --output "type=image,push=true" ${BUILDX_EDGE_ARGS}
-    rm -f ${HOME}/.docker/config.json
-fi
+   docker buildx build \
+         --platform linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le \
+         --pull \
+         --no-cache \
+         --progress plain \
+         --output type=image,push=$push \
+         $build_args \
+         .
+}
 
+image_build_arguments() {
+    cat<<!
+privatebin/fs  --build-arg ALPINE_PACKAGES= --build-arg COMPOSER_PACKAGES=
+privatebin/pdo --build-arg COMPOSER_PACKAGES=
+privatebin/gcs --build-arg ALPINE_PACKAGES=
+privatebin/nginx-fpm-alpine
+!
+}
+
+docker_login() {
+    printenv DOCKER_PASSWORD | docker login --username "$DOCKER_USERNAME" --password-stdin
+}
+
+is_image_push_required() {
+   [[ $EVENT != pull_request ]] && ([[ $GITHUB_REF != refs/heads/master ]] || [[ $EVENT = schedule ]])
+}
+
+main() {
+    local push tag image build_args
+
+    # tag the image with nightly, if it is the scheduled event
+
+    [[ $EVENT == schedule ]] && tag=nightly || tag=$VERSION
+    if is_image_push_required; then
+        push=true
+        docker_login
+    else
+        push=false
+    fi
+
+    image_build_arguments | while read image build_args ; do
+        build_image $push --tag $image:latest  --tag $image:$tag "$build_args"
+    done
+   
+    sed -i.org -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile
+
+    image_build_arguments | while read image build_args ; do
+	build_image $push --tag $image:edge "$build_args"
+    done
+
+    mv Dockerfile.org Dockerfile
+   
+    rm -f "$HOME/.docker/config.json"
+}
+
+main
