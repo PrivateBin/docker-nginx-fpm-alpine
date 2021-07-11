@@ -2,16 +2,19 @@ FROM alpine:3.14
 
 MAINTAINER PrivateBin <support@privatebin.org>
 
-ENV RELEASE   1.3.5
-ENV PBURL     https://github.com/PrivateBin/PrivateBin/
+ARG ALPINE_PACKAGES="php8-pdo_mysql php8-pdo_pgsql"
+ARG COMPOSER_PACKAGES="google/cloud-storage"
+
+ENV RELEASE           1.3.5
+ENV PBURL             https://github.com/PrivateBin/PrivateBin/
 ENV S6_READ_ONLY_ROOT 1
 ENV CONFIG_PATH       /srv/cfg
 
 RUN \
 # Install dependencies
     apk add --no-cache gnupg nginx php8 php8-curl php8-fpm php8-json php8-gd \
-        php8-mbstring php8-opcache php8-pdo_mysql php8-pdo_pgsql php8-phar \
-        s6-overlay tzdata \
+        php8-mbstring php8-opcache php8-phar \
+        s6-overlay tzdata php8-openssl $ALPINE_PACKAGES \
     && apk upgrade --no-cache \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php8/php-fpm.d/www.conf \
@@ -35,7 +38,7 @@ RUN \
     && wget -q $(echo ${PBURL} | sed s/github.com/raw.githubusercontent.com/)${RELEASE}/composer.json \
     && wget -q $(echo ${PBURL} | sed s/github.com/raw.githubusercontent.com/)${RELEASE}/composer.lock \
     && composer remove --dev --no-update phpunit/phpunit \
-    && composer require --no-update google/cloud-storage \
+    && ([ -z "$COMPOSER_PACKAGES"] || composer require --no-update $COMPOSER_PACKAGES) \
     && composer update --no-dev --optimize-autoloader \
     && rm *.md cfg/conf.sample.php composer.* /usr/local/bin/* \
     && mv cfg lib tpl vendor /srv \
