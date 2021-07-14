@@ -16,6 +16,7 @@ LABEL org.opencontainers.image.authors=support@privatebin.org \
 
 RUN \
 # Prepare composer dependencies
+    ALPINE_PACKAGES="$(echo ${ALPINE_PACKAGES} | sed 's/,/ /g')"
     ALPINE_COMPOSER_PACKAGES="" ;\
     if [ -n "${COMPOSER_PACKAGES}" ] ; then \
         ALPINE_COMPOSER_PACKAGES="php8 php8-curl php8-mbstring php8-phar" ;\

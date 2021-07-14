@@ -30,7 +30,7 @@ docker_login() {
 image_build_arguments() {
     cat<<!
 privatebin/fs  --build-arg ALPINE_PACKAGES= --build-arg COMPOSER_PACKAGES=
-privatebin/pdo --build-arg ALPINE_PACKAGES="php8-pdo_mysql php8-pdo_pgsql" --build-arg COMPOSER_PACKAGES=
+privatebin/pdo --build-arg ALPINE_PACKAGES=php8-pdo_mysql,php8-pdo_pgsql --build-arg COMPOSER_PACKAGES=
 privatebin/gcs --build-arg ALPINE_PACKAGES=php8-openssl
 privatebin/nginx-fpm-alpine
 !
