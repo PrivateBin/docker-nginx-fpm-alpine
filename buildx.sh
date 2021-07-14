@@ -62,7 +62,7 @@ main() {
     sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
 
     image_build_arguments | while read -r IMAGE BUILD_ARGS ; do
-        build_image $PUSH --tag "$IMAGE:latest" --tag "$IMAGE:$TAG" "$BUILD_ARGS"
+        build_image $PUSH --tag "$IMAGE:latest" --tag "$IMAGE:$TAG" --tag "${IMAGE}:${TAG%%-*}" "$BUILD_ARGS"
         build_image $PUSH -f Dockerfile.edge    --tag "$IMAGE:edge" "$BUILD_ARGS"
     done
 
