@@ -5,67 +5,71 @@
 set -euxo pipefail
 
 EVENT=$1
-VERSION=${GITHUB_REF##*/}
-
 
 build_image() {
-   local push build_args
-   push=$1; shift 1;
-   build_args="$@"
+    local PUSH
+    PUSH=$1
+    shift 1
 
-   docker buildx build \
-         --platform linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le \
-         --output type=image,push=$push \
-         --pull \
-         --no-cache \
-         --progress plain \
-         $build_args \
-         .
+    docker buildx build \
+        --platform linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le \
+        --output type=image,push="$PUSH" \
+        --pull \
+        --no-cache \
+        --progress plain \
+        $@ \
+        .
+}
+
+docker_login() {
+    printenv DOCKER_PASSWORD | docker login \
+        --username "$DOCKER_USERNAME" \
+        --password-stdin
 }
 
 image_build_arguments() {
     cat<<!
 privatebin/fs  --build-arg ALPINE_PACKAGES= --build-arg COMPOSER_PACKAGES=
-privatebin/pdo --build-arg COMPOSER_PACKAGES=
-privatebin/gcs --build-arg ALPINE_PACKAGES=
+privatebin/pdo --build-arg ALPINE_PACKAGES="php8-pdo_mysql php8-pdo_pgsql" COMPOSER_PACKAGES=
+privatebin/gcs --build-arg ALPINE_PACKAGES=php8-openssl
 privatebin/nginx-fpm-alpine
 !
 }
 
-docker_login() {
-    printenv DOCKER_PASSWORD | docker login --username "$DOCKER_USERNAME" --password-stdin
-}
-
 is_image_push_required() {
-   [[ $EVENT != pull_request ]] && ([[ $GITHUB_REF != refs/heads/master ]] || [[ $EVENT = schedule ]])
+    [ "$EVENT" != pull_request ] && { \
+        [ "$GITHUB_REF" != refs/heads/master ] || \
+        [ "$EVENT" = schedule ]
+    }
 }
 
 main() {
-    local push tag image build_args
+    local PUSH TAG IMAGE BUILD_ARGS
 
-    # tag the image with nightly, if it is the scheduled event
-
-    [[ $EVENT == schedule ]] && tag=nightly || tag=$VERSION
-    if is_image_push_required; then
-        push=true
-        docker_login
+    if [ "$EVENT" = schedule ]
+    then
+        TAG=nightly
     else
-        push=false
+        TAG=${GITHUB_REF##*/}
     fi
 
-    image_build_arguments | while read image build_args ; do
-        build_image $push --tag $image:latest  --tag $image:$tag "$build_args"
-    done
+    if is_image_push_required
+    then
+        PUSH=true
+        docker_login
+    else
+        PUSH=false
+    fi
 
     sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
 
-    image_build_arguments | while read image build_args ; do
-	build_image $push -f Dockerfile.edge --tag $image:edge "$build_args"
+    image_build_arguments | while read -r IMAGE BUILD_ARGS
+    do
+        build_image $PUSH --tag "$IMAGE:latest" --tag "$IMAGE:$TAG" $BUILD_ARGS
+        build_image $PUSH -f Dockerfile.edge    --tag "$IMAGE:edge" $BUILD_ARGS
     done
 
-    rm -f Dockerfile.edge
-
-    rm -f "$HOME/.docker/config.json"
+    rm -f Dockerfile.edge "$HOME/.docker/config.json"
 }
 
-main
+[ "$(basename "$0")" = 'buildx.sh' ] && main
