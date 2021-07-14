@@ -46,15 +46,13 @@ is_image_push_required() {
 main() {
     local PUSH TAG IMAGE BUILD_ARGS
 
-    if [ "$EVENT" = schedule ]
-    then
+    if [ "$EVENT" = schedule ] ; then
         TAG=nightly
     else
         TAG=${GITHUB_REF##*/}
     fi
 
-    if is_image_push_required
-    then
+    if is_image_push_required ; then
         PUSH=true
         docker_login
     else
@@ -63,8 +61,7 @@ main() {
 
     sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
 
-    image_build_arguments | while read -r IMAGE BUILD_ARGS
-    do
+    image_build_arguments | while read -r IMAGE BUILD_ARGS ; do
         build_image $PUSH --tag "$IMAGE:latest" --tag "$IMAGE:$TAG" "$BUILD_ARGS"
         build_image $PUSH -f Dockerfile.edge    --tag "$IMAGE:edge" "$BUILD_ARGS"
     done
