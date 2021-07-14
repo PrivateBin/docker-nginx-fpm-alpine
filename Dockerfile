@@ -51,9 +51,10 @@ RUN \
         && wget -q ${RAWURL}${RELEASE}/composer.lock \
         && composer remove --dev --no-update phpunit/phpunit \
         && composer require --no-update ${COMPOSER_PACKAGES} \
-        && composer update --no-dev --optimize-autoloader ;\
+        && composer update --no-dev --optimize-autoloader \
+        rm composer.* /usr/local/bin/* ;\
     fi \
-    && rm *.md cfg/conf.sample.php composer.* /usr/local/bin/* \
+    && rm *.md cfg/conf.sample.php \
     && mv cfg lib tpl vendor /srv \
     && mkdir -p /srv/data \
     && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" index.php \
