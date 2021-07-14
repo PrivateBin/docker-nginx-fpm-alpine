@@ -30,7 +30,7 @@ docker_login() {
 image_build_arguments() {
     cat<<!
 privatebin/fs  --build-arg ALPINE_PACKAGES= --build-arg COMPOSER_PACKAGES=
-privatebin/pdo --build-arg ALPINE_PACKAGES="php8-pdo_mysql php8-pdo_pgsql" COMPOSER_PACKAGES=
+privatebin/pdo --build-arg ALPINE_PACKAGES="php8-pdo_mysql php8-pdo_pgsql" --build-arg COMPOSER_PACKAGES=
 privatebin/gcs --build-arg ALPINE_PACKAGES=php8-openssl
 privatebin/nginx-fpm-alpine
 !
@@ -65,8 +65,8 @@ main() {
 
     image_build_arguments | while read -r IMAGE BUILD_ARGS
     do
-        build_image $PUSH --tag "$IMAGE:latest" --tag "$IMAGE:$TAG" $BUILD_ARGS
-        build_image $PUSH -f Dockerfile.edge    --tag "$IMAGE:edge" $BUILD_ARGS
+        build_image $PUSH --tag "$IMAGE:latest" --tag "$IMAGE:$TAG" "$BUILD_ARGS"
+        build_image $PUSH -f Dockerfile.edge    --tag "$IMAGE:edge" "$BUILD_ARGS"
     done
 
     rm -f Dockerfile.edge "$HOME/.docker/config.json"
