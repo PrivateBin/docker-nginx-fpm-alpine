@@ -4,29 +4,69 @@
 # accessing an uninitialized variable and print commands before executing them
 set -euxo pipefail
 
-IMAGE=privatebin/nginx-fpm-alpine
-QEMU_PLATFORMS=linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le
-VERSION=${GITHUB_REF##*/}
 EVENT=$1
-[ "${EVENT}" = "schedule" ] && VERSION=nightly
 
-BUILDX_ARGS="--tag ${IMAGE}:latest \
---tag ${IMAGE}:${VERSION} --tag ${IMAGE}:${VERSION%%-*} \
---platform ${QEMU_PLATFORMS} ."
-BUILDX_EDGE_ARGS="--tag ${IMAGE}:edge \
---platform ${QEMU_PLATFORMS} -f Dockerfile-edge ."
+build_image() {
+    local PUSH
+    PUSH=$1
+    shift 1
 
-# build images
-docker build --no-cache --pull --output "type=image,push=false" ${BUILDX_ARGS}
-sed 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile-edge
-docker build --no-cache --pull --output "type=image,push=false" ${BUILDX_EDGE_ARGS}
+    docker buildx build \
+        --platform linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le \
+        --output type=image,push="$PUSH" \
+        --pull \
+        --no-cache \
+        --progress plain \
+        $@ \
+        .
+}
 
-# push cached images
-if [ "${EVENT}" != "pull_request" ] && ([ "${GITHUB_REF}" != "refs/heads/master" ] || [ "${EVENT}" = "schedule" ])
-then
-    printenv DOCKER_PASSWORD | docker login --username "${DOCKER_USERNAME}" --password-stdin
-    docker build --output "type=image,push=true" ${BUILDX_ARGS}
-    docker build --output "type=image,push=true" ${BUILDX_EDGE_ARGS}
-    rm -f ${HOME}/.docker/config.json
-fi
+docker_login() {
+    printenv DOCKER_PASSWORD | docker login \
+        --username "$DOCKER_USERNAME" \
+        --password-stdin
+}
 
+image_build_arguments() {
+    cat<<!
+privatebin/fs  --build-arg ALPINE_PACKAGES= --build-arg COMPOSER_PACKAGES=
+privatebin/pdo --build-arg ALPINE_PACKAGES=php8-pdo_mysql,php8-pdo_pgsql --build-arg COMPOSER_PACKAGES=
+privatebin/gcs --build-arg ALPINE_PACKAGES=php8-openssl
+privatebin/nginx-fpm-alpine
+!
+}
+
+is_image_push_required() {
+    [ "$EVENT" != pull_request ] && { \
+        [ "$GITHUB_REF" != refs/heads/master ] || \
+        [ "$EVENT" = schedule ]
+    }
+}
+
+main() {
+    local PUSH TAG IMAGE BUILD_ARGS
+
+    if [ "$EVENT" = schedule ] ; then
+        TAG=nightly
+    else
+        TAG=${GITHUB_REF##*/}
+    fi
+
+    if is_image_push_required ; then
+        PUSH=true
+        docker_login
+    else
+        PUSH=false
+    fi
+
+    sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
+
+    image_build_arguments | while read -r IMAGE BUILD_ARGS ; do
+        build_image $PUSH --tag "$IMAGE:latest" --tag "$IMAGE:$TAG" --tag "${IMAGE}:${TAG%%-*}" "$BUILD_ARGS"
+        build_image $PUSH -f Dockerfile.edge    --tag "$IMAGE:edge" "$BUILD_ARGS"
+    done
+
+    rm -f Dockerfile.edge "$HOME/.docker/config.json"
+}
+
+[ "$(basename "$0")" = 'buildx.sh' ] && main
