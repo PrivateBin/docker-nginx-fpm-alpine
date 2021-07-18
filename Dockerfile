@@ -24,7 +24,7 @@ RUN \
     fi \
 # Install dependencies
     && apk upgrade --no-cache \
-    && apk add --no-cache gnupg nginx php8-fpm php8-json php8-gd php8-opcache \
+    && apk add --no-cache gnupg git nginx php8-fpm php8-json php8-gd php8-opcache \
         s6-overlay tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php8/php-fpm.d/www.conf \
@@ -37,9 +37,16 @@ RUN \
     && wget -qO - https://privatebin.info/key/release.asc | gpg2 --import - \
     && rm -rf /var/www/* \
     && cd /tmp \
-    && wget -qO $RELEASE.tar.gz.asc ${PBURL}releases/download/${RELEASE}/PrivateBin-${RELEASE}.tar.gz.asc \
-    && wget -q ${PBURL}archive/${RELEASE}.tar.gz \
-    && gpg2 --verify ${RELEASE}.tar.gz.asc \
+    && if expr "${RELEASE}" : '[0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}$' >/dev/null ; then \
+         echo "getting release ${RELEASE}"; \
+         wget -qO ${RELEASE}.tar.gz.asc ${PBURL}releases/download/${RELEASE}/PrivateBin-${RELEASE}.tar.gz.asc \
+         && wget -q ${PBURL}archive/${RELEASE}.tar.gz \
+         && gpg2 --verify ${RELEASE}.tar.gz.asc ; \
+       else \
+         echo "getting tarball for ${RELEASE}"; \
+         git clone ${PBURL%%/}.git -b ${RELEASE}; \
+         (cd $(basename ${PBURL}) && git archive --prefix ${RELEASE}/ --format tgz ${RELEASE} > /tmp/${RELEASE}.tar.gz); \
+       fi \
     && if [ -n "${COMPOSER_PACKAGES}" ] ; then \
         wget -qO composer-installer.php https://getcomposer.org/installer \
         && ln -s $(which php8) /usr/local/bin/php \
@@ -68,7 +75,7 @@ RUN \
     && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp \
 # Clean up
     && rm -rf "${GNUPGHOME}" /tmp/* \
-    && apk del gnupg ${ALPINE_COMPOSER_PACKAGES}
+    && apk del gnupg git ${ALPINE_COMPOSER_PACKAGES}
 
 COPY etc/ /etc/
 
