@@ -117,11 +117,11 @@ spec:
         livenessProbe:
           httpGet:
             path: /
-            port: http
+            port: 8080
         readinessProbe:
           httpGet:
             path: /
-            port: http
+            port: 8080
         volumeMounts:
         - mountPath: /srv/data
           name: privatebin-data
