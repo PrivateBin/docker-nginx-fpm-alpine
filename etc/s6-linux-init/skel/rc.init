@@ -1,0 +1,6 @@
+#!/bin/sh -e
+rl="$1"
+shift
+
+s6-rc-init /run/service
+s6-rc -v2 -u change default

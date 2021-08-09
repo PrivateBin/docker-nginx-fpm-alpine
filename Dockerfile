@@ -5,7 +5,7 @@ ARG COMPOSER_PACKAGES=google/cloud-storage
 ARG PBURL=https://github.com/PrivateBin/PrivateBin/
 ARG RELEASE=1.3.5
 
-ENV CONFIG_PATH=/srv/cfg S6_READ_ONLY_ROOT=1
+ENV CONFIG_PATH=/srv/cfg
 
 LABEL org.opencontainers.image.authors=support@privatebin.org \
       org.opencontainers.image.vendor=PrivateBin \
@@ -25,7 +25,7 @@ RUN \
 # Install dependencies
     && apk upgrade --no-cache \
     && apk add --no-cache gnupg git nginx php8-fpm php8-json php8-gd php8-opcache \
-        s6-overlay tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
+        s6-linux-init s6-rc tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php8/php-fpm.d/www.conf \
     && rm -rf /etc/nginx/sites-* \
@@ -67,17 +67,20 @@ RUN \
     && mkdir -p /srv/data \
     && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" index.php \
 # Support running s6 under a non-root user
-    && mkdir -p /etc/s6/services/nginx/supervise /etc/s6/services/php-fpm8/supervise \
+    && mkdir -p /etc/s6/services/nginx/supervise /etc/s6/services/php-fpm8/supervise /etc/s6-rc \
     && mkfifo \
         /etc/s6/services/nginx/supervise/control \
         /etc/s6/services/php-fpm8/supervise/control \
     && chown -R 65534:82 /etc/s6 /run /srv/* /var/lib/nginx /var/www \
-    && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp \
+    && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp /usr/bin/s6-linux-init* \
 # Clean up
     && rm -rf "${GNUPGHOME}" /tmp/* \
-    && apk del gnupg git ${ALPINE_COMPOSER_PACKAGES}
+    && apk del --no-cache gnupg git ${ALPINE_COMPOSER_PACKAGES}
 
 COPY etc/ /etc/
+
+RUN s6-rc-compile /etc/s6-rc/compiled /etc/s6/services \
+    && s6-linux-init-maker -C -N -B /etc/s6-linux-init/current
 
 WORKDIR /var/www
 # user nobody, group www-data
@@ -88,4 +91,4 @@ VOLUME /run /srv/data /tmp /var/lib/nginx/tmp
 
 EXPOSE 8080
 
-ENTRYPOINT ["/init"]
+ENTRYPOINT ["/etc/s6-linux-init/current/bin/init"]
