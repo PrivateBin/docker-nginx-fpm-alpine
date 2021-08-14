@@ -39,8 +39,6 @@ The parameters in detail:
 - `--restart="always"` - restart the container if it crashes, mainly useful for production setups
 
 > Note that the volume mounted must be owned by UID 65534 / GID 82. If you run the container in a docker instance with "userns-remap" you need to add your subuid/subgid range to these numbers.
->
-> Note, too, that this image exposes the same service on port 80, for backwards compatibility with older versions of the image. To use port 80 with the current image, you either need to have a filesystem with extended attribute support so the nginx binary can be granted the capability to bind to ports below 1024 as non-root user or you need to start the image with user id 0 (root) using the parameter `-u 0`.
 
 ### Custom configuration
 
