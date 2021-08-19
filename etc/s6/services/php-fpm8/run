@@ -1,2 +1,3 @@
 #!/bin/execlineb -P
+s6-envdir /run/env
 /usr/sbin/php-fpm8

@@ -81,7 +81,7 @@ COPY etc/ /etc/
 
 RUN s6-rc-compile /etc/s6-rc/compiled /etc/s6/services \
     && chown -R 65534:82 /etc/s6-rc/compiled \
-    && s6-linux-init-maker -C -N -B /etc/s6-linux-init/current
+    && s6-linux-init-maker -C -N -B -s /run/env /etc/s6-linux-init/current
 
 WORKDIR /var/www
 # user nobody, group www-data
