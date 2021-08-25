@@ -1,4 +1,4 @@
-name: build
+name: trivy-analysis
 on:
   push:
     branches: [ master ]
