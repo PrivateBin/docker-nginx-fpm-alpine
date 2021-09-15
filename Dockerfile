@@ -34,7 +34,7 @@ RUN \
 # Ensure nginx logs, even if the config has errors, are written to stderr
     && ln -s /dev/stderr /var/log/nginx/error.log \
 # Install PrivateBin
-    && export GNUPGHOME="$(mktemp -d)" \
+    && export GNUPGHOME="$(mktemp -d -p /tmp)" \
     && gpg2 --list-public-keys || /bin/true \
     && wget -qO - https://privatebin.info/key/release.asc | gpg2 --import - \
     && rm -rf /var/www/* \
@@ -76,7 +76,7 @@ RUN \
     && chown -R ${UID}:${GID} /etc/s6 /run /srv/* /var/lib/nginx /var/www \
     && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp \
 # Clean up
-    && rm -rf "${GNUPGHOME}" /tmp/* \
+    && rm -rf /tmp/* \
     && apk del --no-cache gnupg git ${ALPINE_COMPOSER_PACKAGES}
 
 COPY etc/ /etc/
