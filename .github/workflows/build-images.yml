@@ -1,4 +1,4 @@
-name: Deploy multi-architecture Docker images for privatebin with buildx
+name: Build & Deploy container image
 
 on:
   schedule:
@@ -15,8 +15,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [stable, edge]
-    name: Build images based on ${{ matrix.image }} Alpine release
+        base-image: [stable, edge]
+        destination-image: [nginx-fpm-alpine, fs, pdo, gcs]
+    name: ${{ matrix.destination-image }} image / ${{ matrix.base-image }} release
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -32,4 +33,4 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: ./buildx.sh ${{ github.event_name }} ${{ matrix.image }}
+        run: ./buildx.sh ${{ github.event_name }} ${{ matrix.destination-image }} ${{ matrix.base-image }}
