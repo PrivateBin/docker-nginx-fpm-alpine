@@ -5,6 +5,8 @@
 set -euxo pipefail
 
 EVENT=$1
+EDGE=false
+[ "$2" = edge ] && EDGE=true
 
 build_image() {
     local PUSH
@@ -59,15 +61,15 @@ main() {
         PUSH=false
     fi
 
+    if [ "$EDGE" = true ] ; then
+        sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
+    fi
     image_build_arguments | while read -r IMAGE BUILD_ARGS ; do
-        build_image $PUSH --tag "$IMAGE:latest" --tag "$IMAGE:$TAG" --tag "${IMAGE}:${TAG%%-*}" "$BUILD_ARGS"
-    done
-
-    # run the edge builds in a separate loop, to avoid issues in them from
-    # preventing the stable image builds and pushes to conclude
-    sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
-    image_build_arguments | while read -r IMAGE BUILD_ARGS ; do
-        build_image $PUSH -f Dockerfile.edge    --tag "$IMAGE:edge" "$BUILD_ARGS"
+        if [ "$EDGE" = false ] ; then
+            build_image $PUSH --tag "$IMAGE:latest" --tag "$IMAGE:$TAG" --tag "${IMAGE}:${TAG%%-*}" "$BUILD_ARGS"
+        else
+            build_image $PUSH -f Dockerfile.edge    --tag "$IMAGE:edge" "$BUILD_ARGS"
+        fi
     done
 
     rm -f Dockerfile.edge "$HOME/.docker/config.json"
