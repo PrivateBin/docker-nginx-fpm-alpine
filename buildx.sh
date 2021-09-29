@@ -59,10 +59,14 @@ main() {
         PUSH=false
     fi
 
-    sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
-
     image_build_arguments | while read -r IMAGE BUILD_ARGS ; do
         build_image $PUSH --tag "$IMAGE:latest" --tag "$IMAGE:$TAG" --tag "${IMAGE}:${TAG%%-*}" "$BUILD_ARGS"
+    done
+
+    # run the edge builds in a separate loop, to avoid issues in them from
+    # preventing the stable image builds and pushes to conclude
+    sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
+    image_build_arguments | while read -r IMAGE BUILD_ARGS ; do
         build_image $PUSH -f Dockerfile.edge    --tag "$IMAGE:edge" "$BUILD_ARGS"
     done
 
