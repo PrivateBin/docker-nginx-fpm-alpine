@@ -76,6 +76,7 @@ RUN \
     && chown -R ${UID}:${GID} /etc/s6 /run /srv/* /var/lib/nginx /var/www \
     && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp \
 # Clean up
+    && gpgconf --kill gpg-agent \
     && rm -rf /tmp/* \
     && apk del --no-cache gnupg git ssl_client ${ALPINE_COMPOSER_PACKAGES}
 
