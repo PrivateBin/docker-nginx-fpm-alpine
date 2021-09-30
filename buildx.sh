@@ -69,11 +69,11 @@ main() {
     esac
     IMAGE="privatebin/$IMAGE"
 
-    if [ "$EDGE" = false ] ; then
-        build_image $PUSH --tag "$IMAGE:latest" --tag "$IMAGE:$TAG" --tag "${IMAGE}:${TAG%%-*}" "$BUILD_ARGS"
-    else
+    if [ "$EDGE" = true ] ; then
         sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
         build_image $PUSH -f Dockerfile.edge    --tag "$IMAGE:edge" "$BUILD_ARGS"
+    else
+        build_image $PUSH --tag "$IMAGE:latest" --tag "$IMAGE:$TAG" --tag "${IMAGE}:${TAG%%-*}" "$BUILD_ARGS"
     fi
 
     rm -f Dockerfile.edge "$HOME/.docker/config.json"
