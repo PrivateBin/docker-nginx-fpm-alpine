@@ -16,7 +16,7 @@ build_image() {
         --output type=image \
         --pull \
         --no-cache \
-        "$@" \
+        $@ \
         .
 }
 
@@ -25,7 +25,7 @@ push_image() {
         --platform linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le \
         --progress plain \
         --push \
-        "$@" \
+        $@ \
         .
 }
 
