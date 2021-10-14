@@ -10,10 +10,8 @@ EDGE=false
 [ "$3" = edge ] && EDGE=true
 
 build_image() {
-    docker buildx build \
-        --platform linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le \
-        --progress plain \
-        --output type=image \
+    # shellcheck disable=SC2068
+    docker build \
         --pull \
         --no-cache \
         $@ \
@@ -21,9 +19,12 @@ build_image() {
 }
 
 push_image() {
+    # shellcheck disable=SC2068
     docker buildx build \
         --platform linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le \
         --progress plain \
+        --pull \
+        --no-cache \
         --push \
         $@ \
         .
