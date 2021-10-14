@@ -13,8 +13,10 @@ build_image() {
     # shellcheck disable=SC2068
     docker build \
         --pull \
+        --no-cache \
         $@ \
         .
+    docker images
 }
 
 push_image() {
