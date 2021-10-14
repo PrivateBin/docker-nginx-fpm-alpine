@@ -73,7 +73,7 @@ main() {
         BUILD_ARGS="-f Dockerfile.edge    --tag $IMAGE:edge $BUILD_ARGS"
         IMAGE="$IMAGE:edge"
     else
-        BUILD_ARGS="--tag $IMAGE:latest --tag $IMAGE:$TAG --tag ${IMAGE}:${TAG%%-*} $BUILD_ARGS"
+        BUILD_ARGS="--tag $IMAGE:$TAG --tag ${IMAGE}:${TAG%%-*} --tag $IMAGE:latest $BUILD_ARGS"
         IMAGE="$IMAGE:latest"
     fi
     build_image "$BUILD_ARGS"
