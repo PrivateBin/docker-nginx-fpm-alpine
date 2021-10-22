@@ -10,16 +10,22 @@ EDGE=false
 [ "$3" = edge ] && EDGE=true
 
 build_image() {
-    local PUSH
-    PUSH=$1
-    shift 1
-
-    docker buildx build \
-        --platform linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le \
-        --output type=image,push="$PUSH" \
+    # shellcheck disable=SC2068
+    docker build \
         --pull \
         --no-cache \
-        --progress plain \
+        --load \
+        $@ \
+        .
+}
+
+push_image() {
+    # shellcheck disable=SC2068
+    docker buildx build \
+        --platform linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le \
+        --pull \
+        --no-cache \
+        --push \
         $@ \
         .
 }
@@ -38,19 +44,12 @@ is_image_push_required() {
 }
 
 main() {
-    local PUSH TAG BUILD_ARGS
+    local TAG BUILD_ARGS
 
     if [ "$EVENT" = schedule ] ; then
         TAG=nightly
     else
         TAG=${GITHUB_REF##*/}
-    fi
-
-    if is_image_push_required ; then
-        PUSH=true
-        docker_login
-    else
-        PUSH=false
     fi
 
     case "$IMAGE" in
@@ -71,9 +70,27 @@ main() {
 
     if [ "$EDGE" = true ] ; then
         sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
-        build_image $PUSH -f Dockerfile.edge    --tag "$IMAGE:edge" "$BUILD_ARGS"
+        BUILD_ARGS="-f Dockerfile.edge    --tag $IMAGE:edge $BUILD_ARGS"
+        IMAGE="$IMAGE:edge"
     else
-        build_image $PUSH --tag "$IMAGE:latest" --tag "$IMAGE:$TAG" --tag "${IMAGE}:${TAG%%-*}" "$BUILD_ARGS"
+        BUILD_ARGS="--tag $IMAGE:latest --tag $IMAGE:$TAG --tag ${IMAGE}:${TAG%%-*} $BUILD_ARGS"
+        IMAGE="$IMAGE:latest"
+    fi
+    build_image "$BUILD_ARGS"
+
+    docker run -d --rm -p 127.0.0.1:8080:8080 --read-only --name smoketest "$IMAGE"
+    sleep 5 # give the services time to start up and the log to collect any errors that might occur
+    test "$(docker inspect --format="{{.State.Running}}" smoketest)" = true
+    curl --silent --show-error -o /dev/null http://127.0.0.1:8080/
+    if docker logs smoketest 2>&1 | grep -E "warn|emerg|fatal|panic"
+    then
+        exit 1
+    fi
+    docker stop smoketest
+
+    if is_image_push_required ; then
+        docker_login
+        push_image "$BUILD_ARGS"
     fi
 
     rm -f Dockerfile.edge "$HOME/.docker/config.json"
