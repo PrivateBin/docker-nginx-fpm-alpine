@@ -85,17 +85,10 @@ spec:
       labels:
         app: privatebin
     spec:
-      initContainers:
-      - name: privatebin-volume-permissions
-        image: privatebin/chown:1.33.0-musl-1.2.2-r0
-        args: ['65534:82', '/mnt']
-        securityContext:
-          runAsUser: 0
-          readOnlyRootFilesystem: true
-        volumeMounts:
-        - mountPath: /mnt
-          name: privatebin-data
-          readOnly: False
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 82
+        fsGroup: 82
       containers:
       - name: privatebin
         image: privatebin/nginx-fpm-alpine:1.3.5
@@ -107,8 +100,6 @@ spec:
         - name: PHP_TZ
           value: Antarctica/South_Pole
         securityContext:
-          runAsUser: 65534
-          runAsGroup: 82
           readOnlyRootFilesystem: true
           privileged: false
           allowPrivilegeEscalation: false
