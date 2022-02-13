@@ -27,7 +27,7 @@ RUN \
 # Install dependencies
     && apk upgrade --no-cache \
     && apk add --no-cache gnupg git nginx php8-fpm php8-json php8-gd php8-opcache \
-        s6 ssl_client tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
+        s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php8/php-fpm.d/www.conf \
     && rm -rf /etc/nginx/sites-* \
@@ -78,7 +78,7 @@ RUN \
 # Clean up
     && gpgconf --kill gpg-agent \
     && rm -rf /tmp/* \
-    && apk del --no-cache gnupg git ssl_client ${ALPINE_COMPOSER_PACKAGES}
+    && apk del --no-cache gnupg git ${ALPINE_COMPOSER_PACKAGES}
 
 COPY etc/ /etc/
 
