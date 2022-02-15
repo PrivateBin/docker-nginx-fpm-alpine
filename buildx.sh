@@ -82,7 +82,7 @@ main() {
     sleep 5 # give the services time to start up and the log to collect any errors that might occur
     test "$(docker inspect --format="{{.State.Running}}" smoketest)" = true
     curl --silent --show-error -o /dev/null http://127.0.0.1:8080/
-    if docker logs smoketest 2>&1 | grep -E "warn|emerg|fatal|panic"
+    if docker logs smoketest 2>&1 | grep -i -E "warn|emerg|fatal|panic|error"
     then
         exit 1
     fi
