@@ -26,3 +26,4 @@
 10053	IGNORE	(Apache Range Header DoS (CVE-2011-3192))
 # again we return 200 to some strange URL
 90034	IGNORE	(Cloud Metadata Potentially Exposed)
+40035	IGNORE	(Hidden File Found)
