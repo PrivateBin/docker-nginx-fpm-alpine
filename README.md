@@ -17,8 +17,8 @@ All images contain a release version of PrivateBin and are offered with the foll
 - `latest` is an alias of the latest pushed image, usually the same as `nightly`, but excluding `edge`
 - `nightly` is the latest released PrivateBin version on an upgraded Alpine release image, including the latest changes from the docker image repository
 - `edge` is the latest released PrivateBin version on an upgraded Alpine edge image
-- `1.3.5` contains PrivateBin version 1.3.5 on the latest tagged release of the docker image repository - gets updated when important security fixes are released for Alpine or upon new Alpine releases
-- `1.3.5-...` are provided for selecting specific, immutable images
+- `1.4.0` contains PrivateBin version 1.4.0 on the latest tagged release of the docker image repository - gets updated when important security fixes are released for Alpine or upon new Alpine releases
+- `1.4.0-...` are provided for selecting specific, immutable images
 
 If you update your images automatically via pulls, the `nightly` or `latest` are recommended. If you prefer to have control and reproducability or use a form of orchestration, the numeric tags are probably preferable. The `edge` tag offers a preview of software in future Alpine releases and as an early warning system to detect image build issues in these.
 
@@ -91,7 +91,7 @@ spec:
         fsGroup: 82
       containers:
       - name: privatebin
-        image: privatebin/nginx-fpm-alpine:1.3.5
+        image: privatebin/nginx-fpm-alpine:1.4.0
         ports:
         - containerPort: 8080
         env:
@@ -115,9 +115,27 @@ spec:
         - mountPath: /srv/data
           name: privatebin-data
           readOnly: False
+        - mountPath: /run
+          name: run
+          readOnly: False
+        - mountPath: /tmp
+          name: tmp
+          readOnly: False
+        - mountPath: /var/lib/nginx/tmp
+          name: nginx-cache
+          readOnly: False
+  volumes:
+    - name: run
+      emptyDir:
+        medium: "Memory"
+    - name: tmp
+      emptyDir:
+        medium: "Memory"
+    - name: nginx-cache
+      emptyDir: {}
 ```
 
-Note that the volume `privatebin-data` has to be a shared, persisted volume across all nodes, i.e. on an NFS share. It is required even when using a database, as some data is always stored in files (server salt, traffic limiters IP hashes, purge limiter time stamp).
+Note that the volume `privatebin-data` has to be a shared, persisted volume across all nodes, i.e. on an NFS share. As of PrivateBin 1.4.0 it is no longer required, when using a database or Google Cloud Storage.
 
 ## Rolling your own image
 
