@@ -48,7 +48,7 @@ In case you want to use a customized [conf.php](https://github.com/PrivateBin/Pr
 docker run -d --restart="always" --read-only -p 8080:8080 -v $PWD/conf.php:/srv/cfg/conf.php:ro -v $PWD/privatebin-data:/srv/data privatebin/nginx-fpm-alpine
 ```
 
-Note: The `Filesystem` data storage is supported out of the box. The image includes PDO modules for MySQL, PostgreSQL and SQLite, required for the `Database` one, but you still need to keep the /srv/data persisted for the server salt and the traffic limiter.
+Note: The `Filesystem` data storage is supported out of the box. The image includes PDO modules for MySQL and PostgreSQL, required for the `Database` one, but you still need to keep the /srv/data persisted for the server salt and the traffic limiter when using a release before 1.4.
 
 ### Adjusting nginx or php-fpm settings
 
