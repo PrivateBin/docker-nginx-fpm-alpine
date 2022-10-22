@@ -67,7 +67,7 @@ RUN \
     && rm *.md cfg/conf.sample.php \
     && mv cfg lib tpl vendor /srv \
     && mkdir -p /srv/data \
-    && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" index.php \
+    && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" *.php \
 # Support running s6 under a non-root user
     && mkdir -p /etc/s6/services/nginx/supervise /etc/s6/services/php-fpm8/supervise \
     && mkfifo \
