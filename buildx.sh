@@ -56,11 +56,14 @@ main() {
         fs)
             BUILD_ARGS="--build-arg ALPINE_PACKAGES= --build-arg COMPOSER_PACKAGES="
             ;;
+        gcs)
+            BUILD_ARGS="--build-arg ALPINE_PACKAGES=php8-openssl --build-arg COMPOSER_PACKAGES=google/cloud-storage"
+            ;;
         pdo)
             BUILD_ARGS="--build-arg ALPINE_PACKAGES=php8-pdo_mysql,php8-pdo_pgsql --build-arg COMPOSER_PACKAGES="
             ;;
-        gcs)
-            BUILD_ARGS="--build-arg ALPINE_PACKAGES=php8-openssl"
+        s3)
+            BUILD_ARGS="--build-arg ALPINE_PACKAGES=php8-openssl --build-arg COMPOSER_PACKAGES=aws/aws-sdk-php"
             ;;
         *)
             BUILD_ARGS=""

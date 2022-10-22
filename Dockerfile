@@ -1,7 +1,7 @@
 FROM alpine:3.16.2
 
 ARG ALPINE_PACKAGES="php8-pdo_mysql php8-pdo_pgsql php8-openssl"
-ARG COMPOSER_PACKAGES=google/cloud-storage
+ARG COMPOSER_PACKAGES="aws/aws-sdk-php google/cloud-storage"
 ARG PBURL=https://github.com/PrivateBin/PrivateBin/
 ARG RELEASE=1.4.0
 ARG UID=65534
