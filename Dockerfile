@@ -26,7 +26,7 @@ RUN \
     fi \
 # Install dependencies
     && apk upgrade --no-cache \
-    && apk add --no-cache gnupg git nginx php8-fpm php8-json php8-gd php8-opcache \
+    && apk add --no-cache gnupg git nginx php8-fpm php8-json php8-gd php8-opcache php8-curl \
         s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php8/php-fpm.d/www.conf \
