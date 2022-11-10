@@ -52,7 +52,7 @@ Note: The `Filesystem` data storage is supported out of the box. The image inclu
 
 ### Adjusting nginx or php-fpm settings
 
-You can attach your own `php.ini` or nginx configuration files to the folders `/etc/php8/conf.d/` and `/etc/nginx/conf.d/` respectively. This would for example let you adjust the maximum size these two services accept for file uploads, if you need more then the default 10 MiB.
+You can attach your own `php.ini` or nginx configuration files to the folders `/etc/php81/conf.d/` and `/etc/nginx/conf.d/` respectively. This would for example let you adjust the maximum size these two services accept for file uploads, if you need more then the default 10 MiB.
 
 ### Timezone settings
 
@@ -147,10 +147,10 @@ docker build -t privatebin/nginx-fpm-alpine .
 
 ### Behind the scenes
 
-The two processes, Nginx and php-fpm, are started by s6 overlay.
+The two processes, Nginx and php-fpm, are started by s6.
 
 Nginx is required to serve static files and caches them, too. Requests to the index.php (which is the only PHP file exposed in the document root at /var/www) are passed to php-fpm via a socket at /run/php-fpm.sock. All other PHP files and the data are stored under /srv.
 
 The Nginx setup supports only HTTP, so make sure that you run a reverse proxy in front of this for HTTPS offloading and reducing the attack surface on your TLS stack. The Nginx in this image is set up to deflate/gzip text content.
 
-During the build of the image the PrivateBin release archive and the s6 overlay binaries are downloaded from Github. All the downloaded Alpine packages, s6 overlay binaries and the PrivateBin archive are validated using cryptographic signatures to ensure they have not been tempered with, before deploying them in the image.
+During the build of the image, the PrivateBin release archive is downloaded from Github. All the downloaded Alpine packages and the PrivateBin archive are validated using cryptographic signatures to ensure they have not been tempered with, before deploying them in the image.
