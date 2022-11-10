@@ -153,4 +153,4 @@ Nginx is required to serve static files and caches them, too. Requests to the in
 
 The Nginx setup supports only HTTP, so make sure that you run a reverse proxy in front of this for HTTPS offloading and reducing the attack surface on your TLS stack. The Nginx in this image is set up to deflate/gzip text content.
 
-During the build of the image the PrivateBin release archive is downloaded from Github. All the downloaded Alpine packages and the PrivateBin archive are validated using cryptographic signatures to ensure they have not been tempered with, before deploying them in the image.
+During the build of the image, the PrivateBin release archive is downloaded from Github. All the downloaded Alpine packages and the PrivateBin archive are validated using cryptographic signatures to ensure they have not been tempered with, before deploying them in the image.
