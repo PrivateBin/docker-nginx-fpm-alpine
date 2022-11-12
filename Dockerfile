@@ -1,6 +1,6 @@
 FROM alpine:3.16.2
 
-ARG ALPINE_PACKAGES="php8-pdo_mysql php8-pdo_pgsql php8-openssl"
+ARG ALPINE_PACKAGES="php81-pdo_mysql php81-pdo_pgsql php81-openssl"
 ARG COMPOSER_PACKAGES="aws/aws-sdk-php google/cloud-storage"
 ARG PBURL=https://github.com/PrivateBin/PrivateBin/
 ARG RELEASE=1.4.0
@@ -21,15 +21,15 @@ RUN \
     ALPINE_PACKAGES="$(echo ${ALPINE_PACKAGES} | sed 's/,/ /g')" ;\
     ALPINE_COMPOSER_PACKAGES="" ;\
     if [ -n "${COMPOSER_PACKAGES}" ] ; then \
-        ALPINE_COMPOSER_PACKAGES="php8 php8-curl php8-mbstring php8-phar" ;\
+        ALPINE_COMPOSER_PACKAGES="php81 php81-curl php81-mbstring php81-phar" ;\
         RAWURL="$(echo ${PBURL} | sed s/github.com/raw.githubusercontent.com/)" ;\
     fi \
 # Install dependencies
     && apk upgrade --no-cache \
-    && apk add --no-cache gnupg git nginx php8-fpm php8-json php8-gd php8-opcache \
-        s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
+    && apk add --no-cache gnupg git nginx php81-fpm php81-gd php81-opcache s6 \
+        tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
 # Remove (some of the) default nginx config
-    && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php8/php-fpm.d/www.conf \
+    && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php81/php-fpm.d/www.conf \
     && rm -rf /etc/nginx/sites-* \
 # Ensure nginx logs, even if the config has errors, are written to stderr
     && ln -s /dev/stderr /var/log/nginx/error.log \
@@ -51,7 +51,7 @@ RUN \
        fi \
     && if [ -n "${COMPOSER_PACKAGES}" ] ; then \
         wget -qO composer-installer.php https://getcomposer.org/installer \
-        && ln -s $(which php8) /usr/local/bin/php \
+        && ln -s $(which php81) /usr/local/bin/php \
         && php composer-installer.php --install-dir=/usr/local/bin --filename=composer ;\
     fi \
     && cd /var/www \
@@ -69,10 +69,10 @@ RUN \
     && mkdir -p /srv/data \
     && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" index.php \
 # Support running s6 under a non-root user
-    && mkdir -p /etc/s6/services/nginx/supervise /etc/s6/services/php-fpm8/supervise \
+    && mkdir -p /etc/s6/services/nginx/supervise /etc/s6/services/php-fpm81/supervise \
     && mkfifo \
         /etc/s6/services/nginx/supervise/control \
-        /etc/s6/services/php-fpm8/supervise/control \
+        /etc/s6/services/php-fpm81/supervise/control \
     && chown -R ${UID}:${GID} /etc/s6 /run /srv/* /var/lib/nginx /var/www \
     && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp \
 # Clean up

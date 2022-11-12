@@ -57,13 +57,13 @@ main() {
             BUILD_ARGS="--build-arg ALPINE_PACKAGES= --build-arg COMPOSER_PACKAGES="
             ;;
         gcs)
-            BUILD_ARGS="--build-arg ALPINE_PACKAGES=php8-openssl --build-arg COMPOSER_PACKAGES=google/cloud-storage"
+            BUILD_ARGS="--build-arg ALPINE_PACKAGES=php81-openssl --build-arg COMPOSER_PACKAGES=google/cloud-storage"
             ;;
         pdo)
-            BUILD_ARGS="--build-arg ALPINE_PACKAGES=php8-pdo_mysql,php8-pdo_pgsql --build-arg COMPOSER_PACKAGES="
+            BUILD_ARGS="--build-arg ALPINE_PACKAGES=php81-pdo_mysql,php81-pdo_pgsql --build-arg COMPOSER_PACKAGES="
             ;;
         s3)
-            BUILD_ARGS="--build-arg ALPINE_PACKAGES=php8-openssl --build-arg COMPOSER_PACKAGES=aws/aws-sdk-php"
+            BUILD_ARGS="--build-arg ALPINE_PACKAGES=php81-openssl --build-arg COMPOSER_PACKAGES=aws/aws-sdk-php"
             ;;
         *)
             BUILD_ARGS=""
@@ -73,7 +73,7 @@ main() {
 
     if [ "$EDGE" = true ] ; then
         sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
-        BUILD_ARGS="-f Dockerfile.edge    --tag $IMAGE:edge $BUILD_ARGS"
+        BUILD_ARGS="-f Dockerfile.edge  --tag $IMAGE:edge $BUILD_ARGS"
         IMAGE="$IMAGE:edge"
     else
         BUILD_ARGS="--tag $IMAGE:latest --tag $IMAGE:$TAG --tag ${IMAGE}:${TAG%%-*} $BUILD_ARGS"
