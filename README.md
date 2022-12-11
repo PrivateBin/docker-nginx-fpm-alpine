@@ -18,8 +18,8 @@ All images contain a release version of PrivateBin and are offered with the foll
 - `latest` is an alias of the latest pushed image, usually the same as `nightly`, but excluding `edge`
 - `nightly` is the latest released PrivateBin version on an upgraded Alpine release image, including the latest changes from the docker image repository
 - `edge` is the latest released PrivateBin version on an upgraded Alpine edge image
-- `1.4.0` contains PrivateBin version 1.4.0 on the latest tagged release of the docker image repository - gets updated when important security fixes are released for Alpine or upon new Alpine releases
-- `1.4.0-...` are provided for selecting specific, immutable images
+- `1.5.0` contains PrivateBin version 1.5.0 on the latest tagged release of the docker image repository - gets updated when important security fixes are released for Alpine or upon new Alpine releases
+- `1.5.0-...` are provided for selecting specific, immutable images
 
 If you update your images automatically via pulls, the `nightly` or `latest` are recommended. If you prefer to have control and reproducability or use a form of orchestration, the numeric tags are probably preferable. The `edge` tag offers a preview of software in future Alpine releases and as an early warning system to detect image build issues in these.
 
@@ -49,7 +49,7 @@ In case you want to use a customized [conf.php](https://github.com/PrivateBin/Pr
 docker run -d --restart="always" --read-only -p 8080:8080 -v $PWD/conf.php:/srv/cfg/conf.php:ro -v $PWD/privatebin-data:/srv/data privatebin/nginx-fpm-alpine
 ```
 
-Note: The `Filesystem` data storage is supported out of the box. The image includes PDO modules for MySQL and PostgreSQL, required for the `Database` one, but you still need to keep the /srv/data persisted for the server salt and the traffic limiter when using a release before 1.4.
+Note: The `Filesystem` data storage is supported out of the box. The image includes PDO modules for MySQL and PostgreSQL, required for the `Database` one, but you still need to keep the /srv/data persisted for the server salt and the traffic limiter when using a release before 1.4.0.
 
 ### Adjusting nginx or php-fpm settings
 
@@ -92,7 +92,7 @@ spec:
         fsGroup: 82
       containers:
       - name: privatebin
-        image: privatebin/nginx-fpm-alpine:1.4.0
+        image: privatebin/nginx-fpm-alpine:1.5.0
         ports:
         - containerPort: 8080
         env:
