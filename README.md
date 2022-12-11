@@ -6,10 +6,11 @@ This repository contains the Dockerfile and resources needed to create a docker 
 
 ## Image variants
 
-This is the all-in-one image that can be used with any storage backend supported by PrivateBin: File based storage, database or Google Cloud Storage. We also offer dedicated images for each backend:
+This is the all-in-one image that can be used with any storage backend supported by PrivateBin: File based storage, databases, Google Cloud or S3 Storage. We also offer dedicated images for each backend:
 - [Image for file based storage](https://hub.docker.com/r/privatebin/fs)
 - [Image for PostgreSQL, MariaDB & MySQL](https://hub.docker.com/r/privatebin/pdo)
 - [Image for Google Cloud Storage](https://hub.docker.com/r/privatebin/gcs)
+- [Image for S3 Storage](https://hub.docker.com/r/privatebin/s3)
 
 ## Image tags
 
