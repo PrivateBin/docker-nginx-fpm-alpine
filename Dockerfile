@@ -8,6 +8,7 @@ ARG UID=65534
 ARG GID=82
 
 ENV CONFIG_PATH=/srv/cfg
+ENV PATH=$PATH:/srv/bin
 
 LABEL org.opencontainers.image.authors=support@privatebin.org \
       org.opencontainers.image.vendor=PrivateBin \
@@ -21,13 +22,13 @@ RUN \
     ALPINE_PACKAGES="$(echo ${ALPINE_PACKAGES} | sed 's/,/ /g')" ;\
     ALPINE_COMPOSER_PACKAGES="" ;\
     if [ -n "${COMPOSER_PACKAGES}" ] ; then \
-        ALPINE_COMPOSER_PACKAGES="php81 php81-curl php81-mbstring php81-phar" ;\
+        ALPINE_COMPOSER_PACKAGES="php81-curl php81-mbstring php81-phar" ;\
         RAWURL="$(echo ${PBURL} | sed s/github.com/raw.githubusercontent.com/)" ;\
     fi \
 # Install dependencies
     && apk upgrade --no-cache \
-    && apk add --no-cache gnupg git nginx php81-fpm php81-gd php81-opcache s6 \
-        tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
+    && apk add --no-cache gnupg git nginx php81 php81-fpm php81-gd php81-opcache \
+        s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
 # Remove (some of the) default nginx config
     && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php81/php-fpm.d/www.conf \
     && rm -rf /etc/nginx/sites-* \
@@ -65,7 +66,7 @@ RUN \
         rm composer.* /usr/local/bin/* ;\
     fi \
     && rm *.md cfg/conf.sample.php \
-    && mv cfg lib tpl vendor /srv \
+    && mv bin cfg lib tpl vendor /srv \
     && mkdir -p /srv/data \
     && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" index.php \
 # Support running s6 under a non-root user
