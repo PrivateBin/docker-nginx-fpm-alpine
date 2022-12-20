@@ -182,6 +182,8 @@ Options:
                    /srv/bin/../cfg/conf.php
 ```
 
+Note that in order to migrate between different storage backends you will need to use the all-in-one image called `privatebin/nginx-fpm-alpine`, as it comes with all the drivers and libraries for the different supported backends. When using the variant images, you will only be able to migrate within two backends of the same storage type, for example two filesystem paths or two database backends.
+
 ## Rolling your own image
 
 To reproduce the image, run:
