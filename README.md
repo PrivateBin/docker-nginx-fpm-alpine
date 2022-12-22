@@ -18,6 +18,7 @@ All images contain a release version of PrivateBin and are offered with the foll
 - `latest` is an alias of the latest pushed image, usually the same as `nightly`, but excluding `edge`
 - `nightly` is the latest released PrivateBin version on an upgraded Alpine release image, including the latest changes from the docker image repository
 - `edge` is the latest released PrivateBin version on an upgraded Alpine edge image
+- `stable` contains the latest commit of the master branch of the [PrivateBin/docker-nginx-fpm-alpine repo](https;//github.com/docker-nginx-fpm-alpine), gets pushed on new commmits
 - `1.5.0` contains PrivateBin version 1.5.0 on the latest tagged release of the docker image repository - gets updated when important security fixes are released for Alpine or upon new Alpine releases
 - `1.5.0-...` are provided for selecting specific, immutable images
 
