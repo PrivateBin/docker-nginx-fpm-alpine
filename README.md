@@ -54,7 +54,7 @@ Note: The `Filesystem` data storage is supported out of the box. The image inclu
 
 ### Adjusting nginx or php-fpm settings
 
-You can attach your own `php.ini` or nginx configuration files to the folders `/etc/php81/conf.d/` and `/etc/nginx/conf.d/` respectively. This would for example let you adjust the maximum size these two services accept for file uploads, if you need more then the default 10 MiB.
+You can attach your own `php.ini` or nginx configuration files to the folders `/etc/php81/conf.d/` and `/etc/nginx/http.d/` respectively. This would for example let you adjust the maximum size these two services accept for file uploads, if you need more then the default 10 MiB.
 
 ### Timezone settings
 
@@ -138,6 +138,52 @@ spec:
 ```
 
 Note that the volume `privatebin-data` has to be a shared, persisted volume across all nodes, i.e. on an NFS share. As of PrivateBin 1.4.0 it is no longer required, when using a database or Google Cloud Storage.
+
+## Running administrative scripts
+
+The image includes two administrative scripts, which you can use to migrate from one storage backend to another, delete pastes by ID, removing empty directories when using the Filesystem backend, to purge all expired pastes and display statistics. These can be executed within the running image or by running the commands as alternative entrypoints with the same volumes attached as in the running service image, the former option is recommended.
+
+```
+# assuming you named your container "privatebin" using the option: --name privatebin
+
+docker exec -t privatebin administration --help
+Usage:
+  administration [--delete <paste id> | --empty-dirs | --help | --purge | --statistics]
+
+Options:
+  -d, --delete      deletes the requested paste ID
+  -e, --empty-dirs  removes empty directories (only if Filesystem storage is
+                    configured)
+  -h, --help        displays this help message
+  -p, --purge       purge all expired pastes
+  -s, --statistics  reads all stored pastes and comments and reports statistics
+
+docker exec -t privatebin migrate --help
+migrate - Copy data between PrivateBin backends
+
+Usage:
+  migrate [--delete-after] [--delete-during] [-f] [-n] [-v] srcconfdir
+          [<dstconfdir>]
+  migrate [-h|--help]
+
+Options:
+  --delete-after   delete data from source after all pastes and comments have
+                   successfully been copied to the destination
+  --delete-during  delete data from source after the current paste and its
+                   comments have successfully been copied to the destination
+  -f               forcefully overwrite data which already exists at the
+                   destination
+  -h, --help       displays this help message
+  -n               dry run, do not copy data
+  -v               be verbose
+  <srcconfdir>     use storage backend configration from conf.php found in
+                   this directory as source
+  <dstconfdir>     optionally, use storage backend configration from conf.php
+                   found in this directory as destination; defaults to:
+                   /srv/bin/../cfg/conf.php
+```
+
+Note that in order to migrate between different storage backends you will need to use the all-in-one image called `privatebin/nginx-fpm-alpine`, as it comes with all the drivers and libraries for the different supported backends. When using the variant images, you will only be able to migrate within two backends of the same storage type, for example two filesystem paths or two database backends.
 
 ## Rolling your own image
 
