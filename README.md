@@ -18,11 +18,11 @@ All images contain a release version of PrivateBin and are offered with the foll
 - `latest` is an alias of the latest pushed image, usually the same as `nightly`, but excluding `edge`
 - `nightly` is the latest released PrivateBin version on an upgraded Alpine release image, including the latest changes from the docker image repository
 - `edge` is the latest released PrivateBin version on an upgraded Alpine edge image
-- `stable` contains the latest commit of the master branch of the [PrivateBin/docker-nginx-fpm-alpine repo](https;//github.com/docker-nginx-fpm-alpine), gets pushed on new commmits
-- `1.5.0` contains PrivateBin version 1.5.0 on the latest tagged release of the docker image repository - gets updated when important security fixes are released for Alpine or upon new Alpine releases
+- `stable` contains the latest PrivateBin release on the latest tagged release of the [docker image git repository](https://github.com/PrivateBin/docker-nginx-fpm-alpine) - gets updated when important security fixes are released for Alpine or upon new Alpine releases
+- `1.5.0` contains PrivateBin version 1.5.0 on the latest tagged release of the [docker image git repository](https://github.com/PrivateBin/docker-nginx-fpm-alpine) - gets updated when important security fixes are released for Alpine or upon new Alpine releases, same as stable
 - `1.5.0-...` are provided for selecting specific, immutable images
 
-If you update your images automatically via pulls, the `nightly` or `latest` are recommended. If you prefer to have control and reproducability or use a form of orchestration, the numeric tags are probably preferable. The `edge` tag offers a preview of software in future Alpine releases and as an early warning system to detect image build issues in these.
+If you update your images automatically via pulls, the `stable`, `nightly` or `latest` are recommended. If you prefer to have control and reproducability or use a form of orchestration, the numeric tags are probably preferable. The `edge` tag offers a preview of software in future Alpine releases and serves as an early warning system to detect image build issues in these.
 
 ## Running the image
 
@@ -93,7 +93,7 @@ spec:
         fsGroup: 82
       containers:
       - name: privatebin
-        image: privatebin/nginx-fpm-alpine:1.5.0
+        image: privatebin/nginx-fpm-alpine:stable
         ports:
         - containerPort: 8080
         env:
