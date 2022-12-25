@@ -143,10 +143,10 @@ Note that the volume `privatebin-data` has to be a shared, persisted volume acro
 
 The image includes two administrative scripts, which you can use to migrate from one storage backend to another, delete pastes by ID, removing empty directories when using the Filesystem backend, to purge all expired pastes and display statistics. These can be executed within the running image or by running the commands as alternative entrypoints with the same volumes attached as in the running service image, the former option is recommended.
 
-```
+```console
 # assuming you named your container "privatebin" using the option: --name privatebin
 
-docker exec -t privatebin administration --help
+$ docker exec -t privatebin administration --help
 Usage:
   administration [--delete <paste id> | --empty-dirs | --help | --purge | --statistics]
 
