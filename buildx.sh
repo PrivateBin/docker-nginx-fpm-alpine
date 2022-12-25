@@ -75,8 +75,11 @@ main() {
         sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
         BUILD_ARGS="-f Dockerfile.edge  --tag $IMAGE:edge $BUILD_ARGS"
         IMAGE="$IMAGE:edge"
-    else
+    elif [ "$EVENT" = push ] ; then
         BUILD_ARGS="--tag $IMAGE:latest --tag $IMAGE:$TAG --tag ${IMAGE}:${TAG%%-*} --tag ${IMAGE}:stable $BUILD_ARGS"
+        IMAGE="$IMAGE:latest"
+    else
+        BUILD_ARGS="--tag $IMAGE:latest --tag $IMAGE:$TAG --tag ${IMAGE}:${TAG%%-*} $BUILD_ARGS"
         IMAGE="$IMAGE:latest"
     fi
     build_image "$BUILD_ARGS"
