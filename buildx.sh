@@ -101,7 +101,7 @@ main() {
 
     if is_image_push_required ; then
         docker_login
-        push_image "${BUILD_ARGS}"
+        push_image "${BUILD_ARGS} ${IMAGE_TAGS}"
     fi
 
     rm -f Dockerfile.edge "${HOME}/.docker/config.json"
