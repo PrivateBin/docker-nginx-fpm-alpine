@@ -69,8 +69,8 @@ main() {
             BUILD_ARGS=""
             ;;
     esac
-    IMAGE="privatebin/$IMAGE:"
-    IMAGE_TAGS="--tag $IMAGE:latest --tag $IMAGE:$TAG --tag ${IMAGE}:${TAG%%-*}"
+    IMAGE="privatebin/${IMAGE}:"
+    IMAGE_TAGS="--tag ${IMAGE}latest --tag ${IMAGE}${TAG} --tag ${IMAGE}${TAG%%-*}"
 
     if [ "$EDGE" = true ] ; then
         # build from alpine:edge instead of the stable release
@@ -78,12 +78,12 @@ main() {
         BUILD_ARGS+=" -f Dockerfile.edge"
 
         # replace the default tags, build just the edge one
-        IMAGE_TAGS="--tag $IMAGE:edge"
+        IMAGE_TAGS="--tag ${IMAGE}edge"
         IMAGE+="edge"
     else
         if [ "$EVENT" = push ] ; then
             # append the stable tag on explicit pushes to master or (git) tags
-            IMAGE_TAGS+=" --tag ${IMAGE}:stable"
+            IMAGE_TAGS+=" --tag ${IMAGE}stable"
         fi
         IMAGE+="latest"
     fi
