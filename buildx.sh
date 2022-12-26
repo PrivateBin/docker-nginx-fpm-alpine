@@ -69,20 +69,25 @@ main() {
             BUILD_ARGS=""
             ;;
     esac
-    IMAGE="privatebin/$IMAGE"
+    IMAGE="privatebin/$IMAGE:"
+    IMAGE_TAGS="--tag $IMAGE:latest --tag $IMAGE:$TAG --tag ${IMAGE}:${TAG%%-*}"
 
     if [ "$EDGE" = true ] ; then
+        # build from alpine:edge instead of the stable release
         sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
-        BUILD_ARGS="-f Dockerfile.edge  --tag $IMAGE:edge $BUILD_ARGS"
-        IMAGE="$IMAGE:edge"
-    elif [ "$EVENT" = push ] ; then
-        BUILD_ARGS="--tag $IMAGE:latest --tag $IMAGE:$TAG --tag ${IMAGE}:${TAG%%-*} --tag ${IMAGE}:stable $BUILD_ARGS"
-        IMAGE="$IMAGE:latest"
+        BUILD_ARGS+=" -f Dockerfile.edge"
+
+        # replace the default tags, build just the edge one
+        IMAGE_TAGS="--tag $IMAGE:edge"
+        IMAGE+="edge"
     else
-        BUILD_ARGS="--tag $IMAGE:latest --tag $IMAGE:$TAG --tag ${IMAGE}:${TAG%%-*} $BUILD_ARGS"
-        IMAGE="$IMAGE:latest"
+        if [ "$EVENT" = push ] ; then
+            # append the stable tag on explicit pushes to master or (git) tags
+            IMAGE_TAGS+=" --tag ${IMAGE}:stable"
+        fi
+        IMAGE+="latest"
     fi
-    build_image "$BUILD_ARGS"
+    build_image "$BUILD_ARGS $IMAGE_TAGS"
 
     docker run -d --rm -p 127.0.0.1:8080:8080 --read-only --name smoketest "$IMAGE"
     sleep 5 # give the services time to start up and the log to collect any errors that might occur
