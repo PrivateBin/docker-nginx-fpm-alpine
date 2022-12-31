@@ -28,8 +28,8 @@ If you update your images automatically via pulls, the `stable`, `nightly` or `l
 
 Assuming you have docker successfully installed and internet access, you can fetch and run the image from the docker hub like this:
 
-```bash
-docker run -d --restart="always" --read-only -p 8080:8080 -v $PWD/privatebin-data:/srv/data privatebin/nginx-fpm-alpine
+```console
+$ docker run -d --restart="always" --read-only -p 8080:8080 -v $PWD/privatebin-data:/srv/data privatebin/nginx-fpm-alpine
 ```
 
 The parameters in detail:
@@ -46,8 +46,8 @@ The parameters in detail:
 
 In case you want to use a customized [conf.php](https://github.com/PrivateBin/PrivateBin/blob/master/cfg/conf.sample.php) file, for example one that has file uploads enabled or that uses a different template, add the file as a second volume:
 
-```bash
-docker run -d --restart="always" --read-only -p 8080:8080 -v $PWD/conf.php:/srv/cfg/conf.php:ro -v $PWD/privatebin-data:/srv/data privatebin/nginx-fpm-alpine
+```console
+$ docker run -d --restart="always" --read-only -p 8080:8080 -v $PWD/conf.php:/srv/cfg/conf.php:ro -v $PWD/privatebin-data:/srv/data privatebin/nginx-fpm-alpine
 ```
 
 Note: The `Filesystem` data storage is supported out of the box. The image includes PDO modules for MySQL and PostgreSQL, required for the `Database` one, but you still need to keep the /srv/data persisted for the server salt and the traffic limiter when using a release before 1.4.0.
@@ -143,10 +143,10 @@ Note that the volume `privatebin-data` has to be a shared, persisted volume acro
 
 The image includes two administrative scripts, which you can use to migrate from one storage backend to another, delete pastes by ID, removing empty directories when using the Filesystem backend, to purge all expired pastes and display statistics. These can be executed within the running image or by running the commands as alternative entrypoints with the same volumes attached as in the running service image, the former option is recommended.
 
-```
+```console
 # assuming you named your container "privatebin" using the option: --name privatebin
 
-docker exec -t privatebin administration --help
+$ docker exec -t privatebin administration --help
 Usage:
   administration [--delete <paste id> | --empty-dirs | --help | --purge | --statistics]
 
@@ -189,8 +189,8 @@ Note that in order to migrate between different storage backends you will need t
 
 To reproduce the image, run:
 
-```bash
-docker build -t privatebin/nginx-fpm-alpine .
+```console
+$ docker build -t privatebin/nginx-fpm-alpine .
 ```
 
 ### Behind the scenes
