@@ -85,6 +85,7 @@ main() {
             # append the stable tag on explicit pushes to master or (git) tags
             IMAGE_TAGS+=" --tag ${IMAGE}stable"
         fi
+        # always build latest on normal builds
         IMAGE+="latest"
     fi
     build_image "${BUILD_ARGS} ${IMAGE_TAGS}"
