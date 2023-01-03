@@ -4,8 +4,8 @@
 # accessing an uninitialized variable and print commands before executing them
 set -euxo pipefail
 
-EVENT=$1
-IMAGE=$2
+EVENT="$1"
+IMAGE="$2"
 EDGE=false
 [ "$3" = edge ] && EDGE=true
 
@@ -32,27 +32,27 @@ push_image() {
 
 docker_login() {
     printenv DOCKER_PASSWORD | docker login \
-        --username "$DOCKER_USERNAME" \
+        --username "${DOCKER_USERNAME}" \
         --password-stdin
 }
 
 is_image_push_required() {
-    [ "$EVENT" != pull_request ] && { \
-        [ "$GITHUB_REF" != refs/heads/master ] || \
-        [ "$EVENT" = schedule ]
+    [ "${EVENT}" != pull_request ] && { \
+        [ "${GITHUB_REF}" != refs/heads/master ] || \
+        [ "${EVENT}" = schedule ]
     }
 }
 
 main() {
-    local TAG BUILD_ARGS
+    local TAG BUILD_ARGS IMAGE_TAGS
 
-    if [ "$EVENT" = schedule ] ; then
+    if [ "${EVENT}" = schedule ] ; then
         TAG=nightly
     else
         TAG=${GITHUB_REF##*/}
     fi
 
-    case "$IMAGE" in
+    case "${IMAGE}" in
         fs)
             BUILD_ARGS="--build-arg ALPINE_PACKAGES= --build-arg COMPOSER_PACKAGES="
             ;;
@@ -69,22 +69,28 @@ main() {
             BUILD_ARGS=""
             ;;
     esac
-    IMAGE="privatebin/$IMAGE"
+    IMAGE="privatebin/${IMAGE}"
+    IMAGE_TAGS="--tag ${IMAGE}:latest --tag ${IMAGE}:${TAG} --tag ${IMAGE}:${TAG%%-*}"
 
-    if [ "$EDGE" = true ] ; then
+    if [ "${EDGE}" = true ] ; then
+        # build from alpine:edge instead of the stable release
         sed -e 's/^FROM alpine:.*$/FROM alpine:edge/' Dockerfile > Dockerfile.edge
-        BUILD_ARGS="-f Dockerfile.edge  --tag $IMAGE:edge $BUILD_ARGS"
-        IMAGE="$IMAGE:edge"
-    elif [ "$EVENT" = push ] ; then
-        BUILD_ARGS="--tag $IMAGE:latest --tag $IMAGE:$TAG --tag ${IMAGE}:${TAG%%-*} --tag ${IMAGE}:stable $BUILD_ARGS"
-        IMAGE="$IMAGE:latest"
-    else
-        BUILD_ARGS="--tag $IMAGE:latest --tag $IMAGE:$TAG --tag ${IMAGE}:${TAG%%-*} $BUILD_ARGS"
-        IMAGE="$IMAGE:latest"
-    fi
-    build_image "$BUILD_ARGS"
+        BUILD_ARGS+=" -f Dockerfile.edge"
 
-    docker run -d --rm -p 127.0.0.1:8080:8080 --read-only --name smoketest "$IMAGE"
+        # replace the default tags, build just the edge one
+        IMAGE_TAGS="--tag ${IMAGE}:edge"
+        IMAGE+=":edge"
+    else
+        if [ "${EVENT}" = push ] ; then
+            # append the stable tag on explicit pushes to master or (git) tags
+            IMAGE_TAGS+=" --tag ${IMAGE}:stable"
+        fi
+        # always build latest on non-edge builds
+        IMAGE+=":latest"
+    fi
+    build_image "${BUILD_ARGS} ${IMAGE_TAGS}"
+
+    docker run -d --rm -p 127.0.0.1:8080:8080 --read-only --name smoketest "${IMAGE}"
     sleep 5 # give the services time to start up and the log to collect any errors that might occur
     test "$(docker inspect --format="{{.State.Running}}" smoketest)" = true
     curl --silent --show-error -o /dev/null http://127.0.0.1:8080/
@@ -96,10 +102,10 @@ main() {
 
     if is_image_push_required ; then
         docker_login
-        push_image "$BUILD_ARGS"
+        push_image "${BUILD_ARGS} ${IMAGE_TAGS}"
     fi
 
-    rm -f Dockerfile.edge "$HOME/.docker/config.json"
+    rm -f Dockerfile.edge "${HOME}/.docker/config.json"
 }
 
 [ "$(basename "$0")" = 'buildx.sh' ] && main
