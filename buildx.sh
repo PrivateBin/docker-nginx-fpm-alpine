@@ -63,7 +63,7 @@ main() {
             BUILD_ARGS="--build-arg ALPINE_PACKAGES=php81-pdo_mysql,php81-pdo_pgsql --build-arg COMPOSER_PACKAGES="
             ;;
         s3)
-            BUILD_ARGS="--build-arg ALPINE_PACKAGES=php81-openssl --build-arg COMPOSER_PACKAGES=aws/aws-sdk-php"
+            BUILD_ARGS="--build-arg ALPINE_PACKAGES=php81-curl,php81-openssl,php81-simplexml --build-arg COMPOSER_PACKAGES=aws/aws-sdk-php"
             ;;
         *)
             BUILD_ARGS=""
