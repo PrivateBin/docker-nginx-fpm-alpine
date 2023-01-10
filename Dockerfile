@@ -1,4 +1,4 @@
-FROM alpine:3.17.0
+FROM alpine:3.17.1
 
 ARG ALPINE_PACKAGES="php81-pdo_mysql php81-pdo_pgsql php81-openssl php81-simplexml"
 ARG COMPOSER_PACKAGES="aws/aws-sdk-php google/cloud-storage"
