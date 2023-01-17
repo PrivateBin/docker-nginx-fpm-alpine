@@ -1,6 +1,6 @@
 FROM alpine:3.17.1
 
-ARG ALPINE_PACKAGES="php81-pdo_mysql php81-pdo_pgsql php81-openssl php81-simplexml"
+ARG ALPINE_PACKAGES="php81-iconv php81-pdo_mysql php81-pdo_pgsql php81-openssl php81-simplexml"
 ARG COMPOSER_PACKAGES="aws/aws-sdk-php google/cloud-storage"
 ARG PBURL=https://github.com/PrivateBin/PrivateBin/
 ARG RELEASE=1.5.1
