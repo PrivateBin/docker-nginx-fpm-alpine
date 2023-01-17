@@ -22,9 +22,12 @@ RUN \
     ALPINE_PACKAGES="$(echo ${ALPINE_PACKAGES} | sed 's/,/ /g')" ;\
     ALPINE_COMPOSER_PACKAGES="" ;\
     if [ -n "${COMPOSER_PACKAGES}" ] ; then \
-        ALPINE_COMPOSER_PACKAGES="php81-mbstring php81-phar" ;\
+        ALPINE_COMPOSER_PACKAGES="php81-phar" ;\
         if [ -n "${ALPINE_PACKAGES##*php81-curl*}" ] ; then \
             ALPINE_COMPOSER_PACKAGES="php81-curl ${ALPINE_COMPOSER_PACKAGES}" ;\
+        fi ;\
+        if [ -n "${ALPINE_PACKAGES##*php81-mbstring*}" ] ; then \
+            ALPINE_COMPOSER_PACKAGES="php81-mbstring ${ALPINE_COMPOSER_PACKAGES}" ;\
         fi ;\
         RAWURL="$(echo ${PBURL} | sed s/github.com/raw.githubusercontent.com/)" ;\
     fi \
