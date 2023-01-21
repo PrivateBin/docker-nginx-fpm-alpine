@@ -1,6 +1,6 @@
 FROM alpine:3.17.1
 
-ARG ALPINE_PACKAGES="php81-pdo_mysql php81-pdo_pgsql php81-openssl php81-simplexml"
+ARG ALPINE_PACKAGES="php81-iconv php81-pdo_mysql php81-pdo_pgsql php81-openssl php81-simplexml"
 ARG COMPOSER_PACKAGES="aws/aws-sdk-php google/cloud-storage"
 ARG PBURL=https://github.com/PrivateBin/PrivateBin/
 ARG RELEASE=1.5.1
@@ -22,9 +22,12 @@ RUN \
     ALPINE_PACKAGES="$(echo ${ALPINE_PACKAGES} | sed 's/,/ /g')" ;\
     ALPINE_COMPOSER_PACKAGES="" ;\
     if [ -n "${COMPOSER_PACKAGES}" ] ; then \
-        ALPINE_COMPOSER_PACKAGES="php81-mbstring php81-phar" ;\
+        ALPINE_COMPOSER_PACKAGES="php81-phar" ;\
         if [ -n "${ALPINE_PACKAGES##*php81-curl*}" ] ; then \
             ALPINE_COMPOSER_PACKAGES="php81-curl ${ALPINE_COMPOSER_PACKAGES}" ;\
+        fi ;\
+        if [ -n "${ALPINE_PACKAGES##*php81-mbstring*}" ] ; then \
+            ALPINE_COMPOSER_PACKAGES="php81-mbstring ${ALPINE_COMPOSER_PACKAGES}" ;\
         fi ;\
         RAWURL="$(echo ${PBURL} | sed s/github.com/raw.githubusercontent.com/)" ;\
     fi \
