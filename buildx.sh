@@ -26,6 +26,7 @@ push_image() {
         --pull \
         --no-cache \
         --push \
+        --provenance=false \
         $@ \
         .
 }
