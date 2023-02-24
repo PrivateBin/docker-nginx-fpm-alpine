@@ -40,7 +40,7 @@ jobs:
         if: (github.ref != 'refs/heads/master' && github.event_name != 'pull_request') || github.event_name == 'schedule'
         with:
           registry: ghcr.io
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: privatebin
           password: ${{ github.token }}
       - name: Docker Build
         run: ./buildx.sh ${{ github.event_name }} ${{ matrix.destination-image }} ${{ matrix.base-image }}
