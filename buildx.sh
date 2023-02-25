@@ -31,12 +31,6 @@ push_image() {
         .
 }
 
-docker_login() {
-    printenv DOCKER_PASSWORD | docker login \
-        --username "${DOCKER_USERNAME}" \
-        --password-stdin
-}
-
 is_image_push_required() {
     [ "${EVENT}" != pull_request ] && { \
         [ "${GITHUB_REF}" != refs/heads/master ] || \
@@ -71,7 +65,7 @@ main() {
             ;;
     esac
     IMAGE="privatebin/${IMAGE}"
-    IMAGE_TAGS="--tag ${IMAGE}:latest --tag ${IMAGE}:${TAG} --tag ${IMAGE}:${TAG%%-*}"
+    IMAGE_TAGS="--tag ${IMAGE}:latest --tag ${IMAGE}:${TAG} --tag ${IMAGE}:${TAG%%-*} --tag ghcr.io/${IMAGE}:latest --tag ghcr.io/${IMAGE}:${TAG} --tag ghcr.io/${IMAGE}:${TAG%%-*}"
 
     if [ "${EDGE}" = true ] ; then
         # build from alpine:edge instead of the stable release
@@ -79,12 +73,12 @@ main() {
         BUILD_ARGS+=" -f Dockerfile.edge"
 
         # replace the default tags, build just the edge one
-        IMAGE_TAGS="--tag ${IMAGE}:edge"
+        IMAGE_TAGS="--tag ${IMAGE}:edge --tag ghcr.io/${IMAGE}:edge"
         IMAGE+=":edge"
     else
         if [ "${EVENT}" = push ] ; then
             # append the stable tag on explicit pushes to master or (git) tags
-            IMAGE_TAGS+=" --tag ${IMAGE}:stable"
+            IMAGE_TAGS+=" --tag ${IMAGE}:stable --tag ghcr.io/${IMAGE}:stable"
         fi
         # always build latest on non-edge builds
         IMAGE+=":latest"
@@ -102,7 +96,6 @@ main() {
     docker stop smoketest
 
     if is_image_push_required ; then
-        docker_login
         push_image "${BUILD_ARGS} ${IMAGE_TAGS}"
     fi
 
