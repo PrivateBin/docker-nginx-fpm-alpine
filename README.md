@@ -27,8 +27,8 @@ If you update your images automatically via pulls, the `stable`, `nightly` or `l
 ## Image registries
 
 These images are hosted on the Docker Hub and the GitHub container registries:
-- [Images on Docker Hub](https://hub.docker.com/u/privatebin)
-- [Images on GitHub](https://github.com/orgs/PrivateBin/packages)
+- [Images on Docker Hub](https://hub.docker.com/u/privatebin), which are prefixed `privatebin` or `docker.io/privatebin`
+- [Images on GitHub](https://github.com/orgs/PrivateBin/packages), which are prefixed `ghcr.io/privatebin`
 
 ## Running the image
 
