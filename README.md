@@ -6,11 +6,11 @@ This repository contains the Dockerfile and resources needed to create a docker 
 
 ## Image variants
 
-This is the all-in-one image that can be used with any storage backend supported by PrivateBin: File based storage, databases, Google Cloud or S3 Storage. We also offer dedicated images for each backend:
-- [Image for file based storage](https://hub.docker.com/r/privatebin/fs)
-- [Image for PostgreSQL, MariaDB & MySQL](https://hub.docker.com/r/privatebin/pdo)
-- [Image for Google Cloud Storage](https://hub.docker.com/r/privatebin/gcs)
-- [Image for S3 Storage](https://hub.docker.com/r/privatebin/s3)
+This is the all-in-one image ([Docker Hub](https://hub.docker.com/r/privatebin/nginx-fpm-alpine/) / [GitHub](https://github.com/orgs/PrivateBin/packages/container/package/nginx-fpm-alpine)) that can be used with any storage backend supported by PrivateBin - file based storage, databases, Google Cloud or S3 Storage. We also offer dedicated images for each backend:
+- [Image for file based storage (Docker Hub](https://hub.docker.com/r/privatebin/fs) / [GitHub](https://github.com/orgs/PrivateBin/packages/container/package/fs))
+- [Image for PostgreSQL, MariaDB & MySQL (Docker Hub](https://hub.docker.com/r/privatebin/pdo) / [GitHub](https://github.com/orgs/PrivateBin/packages/container/package/pdo))
+- [Image for Google Cloud Storage (Docker Hub](https://hub.docker.com/r/privatebin/gcs) / [GitHub](https://github.com/orgs/PrivateBin/packages/container/package/gcs))
+- [Image for S3 Storage (Docker Hub](https://hub.docker.com/r/privatebin/s3) / [GitHub](https://github.com/orgs/PrivateBin/packages/container/package/s3))
 
 ## Image tags
 
@@ -19,10 +19,16 @@ All images contain a release version of PrivateBin and are offered with the foll
 - `nightly` is the latest released PrivateBin version on an upgraded Alpine release image, including the latest changes from the docker image repository
 - `edge` is the latest released PrivateBin version on an upgraded Alpine edge image
 - `stable` contains the latest PrivateBin release on the latest tagged release of the [docker image git repository](https://github.com/PrivateBin/docker-nginx-fpm-alpine) - gets updated when important security fixes are released for Alpine or upon new Alpine releases
-- `1.5.0` contains PrivateBin version 1.5.0 on the latest tagged release of the [docker image git repository](https://github.com/PrivateBin/docker-nginx-fpm-alpine) - gets updated when important security fixes are released for Alpine or upon new Alpine releases, same as stable
-- `1.5.0-...` are provided for selecting specific, immutable images
+- `1.5.1` contains PrivateBin version 1.5.1 on the latest tagged release of the [docker image git repository](https://github.com/PrivateBin/docker-nginx-fpm-alpine) - gets updated when important security fixes are released for Alpine or upon new Alpine releases, same as stable
+- `1.5.1-...` are provided for selecting specific, immutable images
 
 If you update your images automatically via pulls, the `stable`, `nightly` or `latest` are recommended. If you prefer to have control and reproducability or use a form of orchestration, the numeric tags are probably preferable. The `edge` tag offers a preview of software in future Alpine releases and serves as an early warning system to detect image build issues in these.
+
+## Image registries
+
+These images are hosted on the Docker Hub and the GitHub container registries:
+- [Images on Docker Hub](https://hub.docker.com/u/privatebin), which are prefixed `privatebin` or `docker.io/privatebin`
+- [Images on GitHub](https://github.com/orgs/PrivateBin/packages), which are prefixed `ghcr.io/privatebin`
 
 ## Running the image
 
