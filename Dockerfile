@@ -1,6 +1,6 @@
 FROM alpine:3.18.0
 
-ARG ALPINE_PACKAGES="php81-iconv php81-pdo_mysql php81-pdo_pgsql php81-openssl php81-simplexml"
+ARG ALPINE_PACKAGES="php82-iconv php82-pdo_mysql php82-pdo_pgsql php82-openssl php82-simplexml"
 ARG COMPOSER_PACKAGES="aws/aws-sdk-php google/cloud-storage"
 ARG PBURL=https://github.com/PrivateBin/PrivateBin/
 ARG RELEASE=1.5.1
@@ -22,22 +22,23 @@ RUN \
     ALPINE_PACKAGES="$(echo ${ALPINE_PACKAGES} | sed 's/,/ /g')" ;\
     ALPINE_COMPOSER_PACKAGES="" ;\
     if [ -n "${COMPOSER_PACKAGES}" ] ; then \
-        ALPINE_COMPOSER_PACKAGES="php81-phar" ;\
-        if [ -n "${ALPINE_PACKAGES##*php81-curl*}" ] ; then \
-            ALPINE_COMPOSER_PACKAGES="php81-curl ${ALPINE_COMPOSER_PACKAGES}" ;\
+        ALPINE_COMPOSER_PACKAGES="php82-phar" ;\
+        if [ -n "${ALPINE_PACKAGES##*php82-curl*}" ] ; then \
+            ALPINE_COMPOSER_PACKAGES="php82-curl ${ALPINE_COMPOSER_PACKAGES}" ;\
         fi ;\
-        if [ -n "${ALPINE_PACKAGES##*php81-mbstring*}" ] ; then \
-            ALPINE_COMPOSER_PACKAGES="php81-mbstring ${ALPINE_COMPOSER_PACKAGES}" ;\
+        if [ -n "${ALPINE_PACKAGES##*php82-mbstring*}" ] ; then \
+            ALPINE_COMPOSER_PACKAGES="php82-mbstring ${ALPINE_COMPOSER_PACKAGES}" ;\
         fi ;\
         RAWURL="$(echo ${PBURL} | sed s/github.com/raw.githubusercontent.com/)" ;\
     fi \
 # Install dependencies
     && apk upgrade --no-cache \
-    && apk add --no-cache gnupg git nginx php81 php81-fpm php81-gd php81-opcache \
+    && apk add --no-cache gnupg git nginx php82 php82-fpm php82-gd php82-opcache \
         s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
 # Stabilize php config location
-    && mv /etc/php81 /etc/php \
-    && ln -s /etc/php /etc/php81 \
+    && mv /etc/php82 /etc/php \
+    && ln -s /etc/php /etc/php82 \
+    && ln -s $(which php82) /usr/local/bin/php \
 # Remove (some of the) default nginx & php config
     && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php/php-fpm.d/www.conf \
     && rm -rf /etc/nginx/sites-* \
@@ -61,7 +62,6 @@ RUN \
        fi \
     && if [ -n "${COMPOSER_PACKAGES}" ] ; then \
         wget -qO composer-installer.php https://getcomposer.org/installer \
-        && ln -s $(which php81) /usr/local/bin/php \
         && php composer-installer.php --install-dir=/usr/local/bin --filename=composer ;\
     fi \
     && cd /var/www \
@@ -79,10 +79,10 @@ RUN \
     && mkdir -p /srv/data \
     && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" index.php \
 # Support running s6 under a non-root user
-    && mkdir -p /etc/s6/services/nginx/supervise /etc/s6/services/php-fpm81/supervise \
+    && mkdir -p /etc/s6/services/nginx/supervise /etc/s6/services/php-fpm82/supervise \
     && mkfifo \
         /etc/s6/services/nginx/supervise/control \
-        /etc/s6/services/php-fpm81/supervise/control \
+        /etc/s6/services/php-fpm82/supervise/control \
     && chown -R ${UID}:${GID} /etc/s6 /run /srv/* /var/lib/nginx /var/www \
     && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp \
 # Clean up
