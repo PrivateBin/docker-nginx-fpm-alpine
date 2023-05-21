@@ -35,8 +35,11 @@ RUN \
     && apk upgrade --no-cache \
     && apk add --no-cache gnupg git nginx php81 php81-fpm php81-gd php81-opcache \
         s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
-# Remove (some of the) default nginx config
-    && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php81/php-fpm.d/www.conf \
+# Stabilize php config location
+    && mv /etc/php81 /etc/php \
+    && ln -s /etc/php /etc/php81 \
+# Remove (some of the) default nginx & php config
+    && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php/php-fpm.d/www.conf \
     && rm -rf /etc/nginx/sites-* \
 # Ensure nginx logs, even if the config has errors, are written to stderr
     && ln -s /dev/stderr /var/log/nginx/error.log \
