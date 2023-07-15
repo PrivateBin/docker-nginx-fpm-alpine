@@ -17,6 +17,8 @@ LABEL org.opencontainers.image.authors=support@privatebin.org \
       org.opencontainers.image.licenses=zlib-acknowledgement \
       org.opencontainers.image.version=${RELEASE}
 
+COPY release.asc /tmp/
+
 RUN \
 # Prepare composer dependencies
     ALPINE_PACKAGES="$(echo ${ALPINE_PACKAGES} | sed 's/,/ /g')" ;\
@@ -45,11 +47,11 @@ RUN \
 # Ensure nginx logs, even if the config has errors, are written to stderr
     && ln -s /dev/stderr /var/log/nginx/error.log \
 # Install PrivateBin
+    && cd /tmp \
     && export GNUPGHOME="$(mktemp -d -p /tmp)" \
     && gpg2 --list-public-keys || /bin/true \
-    && wget -qO - https://privatebin.info/key/release.asc | gpg2 --import - \
+    && gpg2 --import /tmp/release.asc \
     && rm -rf /var/www/* \
-    && cd /tmp \
     && if expr "${RELEASE}" : '[0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}$' >/dev/null ; then \
          echo "getting release ${RELEASE}"; \
          wget -qO ${RELEASE}.tar.gz.asc ${PBURL}releases/download/${RELEASE}/PrivateBin-${RELEASE}.tar.gz.asc \
