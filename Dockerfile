@@ -1,4 +1,4 @@
-FROM alpine:3.18.5
+FROM alpine:3.19.0
 
 ARG ALPINE_PACKAGES="php82-iconv php82-pdo_mysql php82-pdo_pgsql php82-openssl php82-simplexml"
 ARG COMPOSER_PACKAGES="aws/aws-sdk-php google/cloud-storage"
