@@ -1,6 +1,6 @@
 FROM alpine:3.19.0
 
-ARG ALPINE_PACKAGES="php82-iconv php82-pdo_mysql php82-pdo_pgsql php82-openssl php82-simplexml"
+ARG ALPINE_PACKAGES="php83-iconv php83-pdo_mysql php83-pdo_pgsql php83-openssl php83-simplexml"
 ARG COMPOSER_PACKAGES="aws/aws-sdk-php google/cloud-storage"
 ARG PBURL=https://github.com/PrivateBin/PrivateBin/
 ARG RELEASE=1.6.1
@@ -24,23 +24,23 @@ RUN \
     ALPINE_PACKAGES="$(echo ${ALPINE_PACKAGES} | sed 's/,/ /g')" ;\
     ALPINE_COMPOSER_PACKAGES="" ;\
     if [ -n "${COMPOSER_PACKAGES}" ] ; then \
-        ALPINE_COMPOSER_PACKAGES="php82-phar" ;\
-        if [ -n "${ALPINE_PACKAGES##*php82-curl*}" ] ; then \
-            ALPINE_COMPOSER_PACKAGES="php82-curl ${ALPINE_COMPOSER_PACKAGES}" ;\
+        ALPINE_COMPOSER_PACKAGES="php83-phar" ;\
+        if [ -n "${ALPINE_PACKAGES##*php83-curl*}" ] ; then \
+            ALPINE_COMPOSER_PACKAGES="php83-curl ${ALPINE_COMPOSER_PACKAGES}" ;\
         fi ;\
-        if [ -n "${ALPINE_PACKAGES##*php82-mbstring*}" ] ; then \
-            ALPINE_COMPOSER_PACKAGES="php82-mbstring ${ALPINE_COMPOSER_PACKAGES}" ;\
+        if [ -n "${ALPINE_PACKAGES##*php83-mbstring*}" ] ; then \
+            ALPINE_COMPOSER_PACKAGES="php83-mbstring ${ALPINE_COMPOSER_PACKAGES}" ;\
         fi ;\
         RAWURL="$(echo ${PBURL} | sed s/github.com/raw.githubusercontent.com/)" ;\
     fi \
 # Install dependencies
     && apk upgrade --no-cache \
-    && apk add --no-cache gnupg git nginx php82 php82-fpm php82-gd php82-opcache \
+    && apk add --no-cache gnupg git nginx php83 php83-fpm php83-gd php83-opcache \
         s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
 # Stabilize php config location
-    && mv /etc/php82 /etc/php \
-    && ln -s /etc/php /etc/php82 \
-    && ln -s $(which php82) /usr/local/bin/php \
+    && mv /etc/php83 /etc/php \
+    && ln -s /etc/php /etc/php83 \
+    && ln -s $(which php83) /usr/local/bin/php \
 # Remove (some of the) default nginx & php config
     && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php/php-fpm.d/www.conf \
     && rm -rf /etc/nginx/sites-* \
@@ -81,10 +81,10 @@ RUN \
     && mkdir -p /srv/data \
     && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" index.php \
 # Support running s6 under a non-root user
-    && mkdir -p /etc/s6/services/nginx/supervise /etc/s6/services/php-fpm82/supervise \
+    && mkdir -p /etc/s6/services/nginx/supervise /etc/s6/services/php-fpm83/supervise \
     && mkfifo \
         /etc/s6/services/nginx/supervise/control \
-        /etc/s6/services/php-fpm82/supervise/control \
+        /etc/s6/services/php-fpm83/supervise/control \
     && chown -R ${UID}:${GID} /etc/s6 /run /srv/* /var/lib/nginx /var/www \
     && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp \
 # Clean up
