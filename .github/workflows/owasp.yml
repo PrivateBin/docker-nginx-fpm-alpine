@@ -35,7 +35,7 @@ jobs:
 
       # Run OWASP scan
       - name: OWASP ZAP Full Scan
-        uses: zaproxy/action-full-scan@v0.8.0
+        uses: zaproxy/action-full-scan@v0.9.0
         with:
           # GitHub Token to create issues in the repository
           #token: # optional, default is ${{ github.token }}
