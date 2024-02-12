@@ -35,8 +35,8 @@ RUN \
     fi \
 # Install dependencies
     && apk upgrade --no-cache \
-    && apk add --no-cache gnupg git nginx php83 php83-fpm php83-gd php83-opcache \
-        s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
+    && apk add --no-cache composer gnupg git nginx php83 php83-fpm php83-gd \
+        php83-opcache s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
 # Stabilize php config location
     && mv /etc/php83 /etc/php \
     && ln -s /etc/php /etc/php83 \
@@ -62,19 +62,13 @@ RUN \
          git clone ${PBURL%%/}.git -b ${RELEASE}; \
          (cd $(basename ${PBURL}) && git archive --prefix ${RELEASE}/ --format tgz ${RELEASE} > /tmp/${RELEASE}.tar.gz); \
        fi \
-    && if [ -n "${COMPOSER_PACKAGES}" ] ; then \
-        wget -qO composer-installer.php https://getcomposer.org/installer \
-        && php composer-installer.php --install-dir=/usr/local/bin --filename=composer ;\
-    fi \
     && cd /var/www \
     && tar -xzf /tmp/${RELEASE}.tar.gz --strip 1 \
     && if [ -n "${COMPOSER_PACKAGES}" ] ; then \
-        wget -q ${RAWURL}${RELEASE}/composer.json \
-        && wget -q ${RAWURL}${RELEASE}/composer.lock \
-        && composer remove --dev --no-update phpunit/phpunit \
+        composer remove --dev --no-update phpunit/phpunit \
         && composer require --no-update ${COMPOSER_PACKAGES} \
         && composer update --no-dev --optimize-autoloader \
-        rm composer.* /usr/local/bin/* ;\
+        rm /usr/local/bin/* ;\
     fi \
     && rm *.md cfg/conf.sample.php \
     && mv bin cfg lib tpl vendor /srv \
@@ -89,8 +83,8 @@ RUN \
     && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp \
 # Clean up
     && gpgconf --kill gpg-agent \
-    && rm -rf /tmp/* \
-    && apk del --no-cache gnupg git ${ALPINE_COMPOSER_PACKAGES}
+    && rm -rf /tmp/* composer.* \
+    && apk del --no-cache composer gnupg git ${ALPINE_COMPOSER_PACKAGES}
 
 COPY etc/ /etc/
 
