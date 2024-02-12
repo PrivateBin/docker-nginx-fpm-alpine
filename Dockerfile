@@ -65,12 +65,10 @@ RUN \
     && cd /var/www \
     && tar -xzf /tmp/${RELEASE}.tar.gz --strip 1 \
     && if [ -n "${COMPOSER_PACKAGES}" ] ; then \
-        wget -q ${RAWURL}${RELEASE}/composer.json \
-        && wget -q ${RAWURL}${RELEASE}/composer.lock \
-        && composer remove --dev --no-update phpunit/phpunit \
+        composer remove --dev --no-update phpunit/phpunit \
         && composer require --no-update ${COMPOSER_PACKAGES} \
         && composer update --no-dev --optimize-autoloader \
-        rm composer.* /usr/local/bin/* ;\
+        rm /usr/local/bin/* ;\
     fi \
     && rm *.md cfg/conf.sample.php \
     && mv bin cfg lib tpl vendor /srv \
@@ -85,7 +83,7 @@ RUN \
     && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp \
 # Clean up
     && gpgconf --kill gpg-agent \
-    && rm -rf /tmp/* \
+    && rm -rf /tmp/* composer.* \
     && apk del --no-cache composer gnupg git ${ALPINE_COMPOSER_PACKAGES}
 
 COPY etc/ /etc/
