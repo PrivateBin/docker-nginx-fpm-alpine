@@ -35,8 +35,8 @@ RUN \
     fi \
 # Install dependencies
     && apk upgrade --no-cache \
-    && apk add --no-cache gnupg git nginx php83 php83-fpm php83-gd php83-opcache \
-        s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
+    && apk add --no-cache gnupg git nginx php83 php83-ctype php83-fpm php83-gd \
+        php83-opcache s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
 # Stabilize php config location
     && mv /etc/php83 /etc/php \
     && ln -s /etc/php /etc/php83 \
