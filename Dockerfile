@@ -3,7 +3,7 @@ FROM alpine:3.19.1
 ARG ALPINE_PACKAGES="php83-iconv php83-pdo_mysql php83-pdo_pgsql php83-openssl php83-simplexml"
 ARG COMPOSER_PACKAGES="aws/aws-sdk-php google/cloud-storage"
 ARG PBURL=https://github.com/PrivateBin/PrivateBin/
-ARG RELEASE=1.7.1
+ARG RELEASE=1.7.2
 ARG UID=65534
 ARG GID=82
 
@@ -35,7 +35,7 @@ RUN \
     fi \
 # Install dependencies
     && apk upgrade --no-cache \
-    && apk add --no-cache composer gnupg git nginx php83 php83-fpm php83-gd \
+    && apk add --no-cache composer gnupg git nginx php83 php83-ctype php83-fpm php83-gd \
         php83-opcache s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
 # Stabilize php config location
     && mv /etc/php83 /etc/php \
