@@ -24,18 +24,20 @@ RUN \
     ALPINE_PACKAGES="$(echo ${ALPINE_PACKAGES} | sed 's/,/ /g')" ;\
     ALPINE_COMPOSER_PACKAGES="" ;\
     if [ -n "${COMPOSER_PACKAGES}" ] ; then \
-        ALPINE_COMPOSER_PACKAGES="php83-phar" ;\
+        ALPINE_COMPOSER_PACKAGES="composer" ;\
         if [ -n "${ALPINE_PACKAGES##*php83-curl*}" ] ; then \
             ALPINE_COMPOSER_PACKAGES="php83-curl ${ALPINE_COMPOSER_PACKAGES}" ;\
         fi ;\
         if [ -n "${ALPINE_PACKAGES##*php83-mbstring*}" ] ; then \
             ALPINE_COMPOSER_PACKAGES="php83-mbstring ${ALPINE_COMPOSER_PACKAGES}" ;\
         fi ;\
-        RAWURL="$(echo ${PBURL} | sed s/github.com/raw.githubusercontent.com/)" ;\
+        if [ -z "${ALPINE_PACKAGES##*php83-simplexml*}" ] ; then \
+            ALPINE_COMPOSER_PACKAGES="php82-simplexml ${ALPINE_COMPOSER_PACKAGES}" ;\
+        fi ;\
     fi \
 # Install dependencies
     && apk upgrade --no-cache \
-    && apk add --no-cache composer gnupg git nginx php83 php83-ctype php83-fpm php83-gd \
+    && apk add --no-cache gnupg git nginx php83 php83-ctype php83-fpm php83-gd \
         php83-opcache s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
 # Stabilize php config location
     && mv /etc/php83 /etc/php \
@@ -66,6 +68,7 @@ RUN \
     && tar -xzf /tmp/${RELEASE}.tar.gz --strip 1 \
     && if [ -n "${COMPOSER_PACKAGES}" ] ; then \
         composer remove --dev --no-update phpunit/phpunit \
+        && composer config --unset platform \
         && composer require --no-update ${COMPOSER_PACKAGES} \
         && composer update --no-dev --optimize-autoloader \
         rm /usr/local/bin/* ;\
@@ -84,7 +87,7 @@ RUN \
 # Clean up
     && gpgconf --kill gpg-agent \
     && rm -rf /tmp/* composer.* \
-    && apk del --no-cache composer gnupg git ${ALPINE_COMPOSER_PACKAGES}
+    && apk del --no-cache gnupg git ${ALPINE_COMPOSER_PACKAGES}
 
 COPY etc/ /etc/
 
