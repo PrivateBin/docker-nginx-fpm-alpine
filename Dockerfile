@@ -1,4 +1,4 @@
-FROM alpine:3.19.1
+FROM alpine:3.20.0
 
 ARG ALPINE_PACKAGES="php83-iconv php83-pdo_mysql php83-pdo_pgsql php83-openssl php83-simplexml"
 ARG COMPOSER_PACKAGES="aws/aws-sdk-php google/cloud-storage"
@@ -30,9 +30,6 @@ RUN \
         fi ;\
         if [ -n "${ALPINE_PACKAGES##*php83-mbstring*}" ] ; then \
             ALPINE_COMPOSER_PACKAGES="php83-mbstring ${ALPINE_COMPOSER_PACKAGES}" ;\
-        fi ;\
-        if [ -z "${ALPINE_PACKAGES##*php83-simplexml*}" ] ; then \
-            ALPINE_COMPOSER_PACKAGES="php82-simplexml ${ALPINE_COMPOSER_PACKAGES}" ;\
         fi ;\
     fi \
 # Install dependencies
