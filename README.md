@@ -58,6 +58,45 @@ $ docker run -d --restart="always" --read-only -p 8080:8080 -v $PWD/conf.php:/sr
 
 Note: The `Filesystem` data storage is supported out of the box. The image includes PDO modules for MySQL and PostgreSQL, required for the `Database` one, but you still need to keep the /srv/data persisted for the server salt and the traffic limiter when using a release before 1.4.0.
 
+#### Environment variables
+
+The following variables do get passed down to the PHP application to support various scenarios. This allows changing some settings via the environment instead of a configuration file. Most of these relate to the storage backends:
+
+##### Amazon Web Services variables used by the S3 backend
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_CONTAINER_AUTHORIZATION_TOKEN`
+- `AWS_CONTAINER_CREDENTIALS_FULL_URI`
+- `AWS_CONTAINER_CREDENTIALS_RELATIVE_URI`
+- `AWS_DEFAULT_REGION`
+- `AWS_PROFILE`
+- `AWS_ROLE_ARN`
+- `AWS_ROLE_SESSION_NAME`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_SESSION_TOKEN`
+- `AWS_STS_REGIONAL_ENDPOINTS`
+- `AWS_WEB_IDENTITY_TOKEN_FILE`
+- `AWS_SHARED_CREDENTIALS_FILE`
+
+##### Google Cloud variables used by the GCS backend
+- `GCLOUD_PROJECT`
+- `GOOGLE_APPLICATION_CREDENTIALS`
+- `GOOGLE_CLOUD_PROJECT`
+- `PRIVATEBIN_GCS_BUCKET`
+
+##### Custom backend settings
+
+The following variables are not used by default, but can be [enabled in your custom configuration file](https://github.com/PrivateBin/docker-nginx-fpm-alpine/issues/196#issuecomment-2163331528), to keep sensitive information out of it:
+
+- `STORAGE_HOST`
+- `STORAGE_LOGIN`
+- `STORAGE_PASSWORD`
+- `STORAGE_CONTAINER`
+
+##### Configuration folder
+
+- `CONFIG_PATH`
+
 ### Adjusting nginx or php-fpm settings
 
 You can attach your own `php.ini` or nginx configuration files to the folders `/etc/php/conf.d/` and `/etc/nginx/http.d/` respectively. This would for example let you adjust the maximum size these two services accept for file uploads, if you need more then the default 10 MiB.
