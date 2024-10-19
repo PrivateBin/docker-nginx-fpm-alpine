@@ -1,3 +1,3 @@
 #!/bin/execlineb -P
 foreground { cp -r /etc/s6/services /run }
-/bin/s6-svscan /run/services
+s6-svscan /run/services
