@@ -1,6 +1,6 @@
 FROM alpine:3.21
 
-ARG ALPINE_PACKAGES="php83-iconv php83-pdo_mysql php83-pdo_pgsql php83-openssl php83-simplexml"
+ARG ALPINE_PACKAGES="php84-iconv php84-pdo_mysql php84-pdo_pgsql php84-openssl php84-simplexml"
 ARG COMPOSER_PACKAGES="aws/aws-sdk-php google/cloud-storage"
 ARG PBURL=https://github.com/PrivateBin/PrivateBin/
 ARG RELEASE=1.7.6
@@ -24,6 +24,7 @@ RUN \
     ALPINE_PACKAGES="$(echo ${ALPINE_PACKAGES} | sed 's/,/ /g')" ;\
     ALPINE_COMPOSER_PACKAGES="" ;\
     if [ -n "${COMPOSER_PACKAGES}" ] ; then \
+        # we need these PHP 8.3 packages until composer gets updated to depend on PHP 8.4
         ALPINE_COMPOSER_PACKAGES="composer" ;\
         if [ -n "${ALPINE_PACKAGES##*php83-curl*}" ] ; then \
             ALPINE_COMPOSER_PACKAGES="php83-curl ${ALPINE_COMPOSER_PACKAGES}" ;\
@@ -31,15 +32,18 @@ RUN \
         if [ -n "${ALPINE_PACKAGES##*php83-mbstring*}" ] ; then \
             ALPINE_COMPOSER_PACKAGES="php83-mbstring ${ALPINE_COMPOSER_PACKAGES}" ;\
         fi ;\
+        if [ -z "${ALPINE_PACKAGES##*php84-simplexml*}" ] ; then \
+            ALPINE_COMPOSER_PACKAGES="php83-simplexml ${ALPINE_COMPOSER_PACKAGES}" ;\
+        fi ;\
     fi \
 # Install dependencies
     && apk upgrade --no-cache \
-    && apk add --no-cache gnupg git nginx php83 php83-ctype php83-fpm php83-gd \
-        php83-opcache s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
+    && apk add --no-cache gnupg git nginx php84 php84-ctype php84-fpm php84-gd \
+        php84-opcache s6 tzdata ${ALPINE_PACKAGES} ${ALPINE_COMPOSER_PACKAGES} \
 # Stabilize php config location
-    && mv /etc/php83 /etc/php \
-    && ln -s /etc/php /etc/php83 \
-    && ln -s $(which php83) /usr/local/bin/php \
+    && mv /etc/php84 /etc/php \
+    && ln -s /etc/php /etc/php84 \
+    && ln -s $(which php84) /usr/local/bin/php \
 # Remove (some of the) default nginx & php config
     && rm -f /etc/nginx.conf /etc/nginx/http.d/default.conf /etc/php/php-fpm.d/www.conf \
     && rm -rf /etc/nginx/sites-* \
@@ -75,10 +79,10 @@ RUN \
     && mkdir -p /srv/data \
     && sed -i "s#define('PATH', '');#define('PATH', '/srv/');#" index.php \
 # Support running s6 under a non-root user
-    && mkdir -p /etc/s6/services/nginx/supervise /etc/s6/services/php-fpm83/supervise \
+    && mkdir -p /etc/s6/services/nginx/supervise /etc/s6/services/php-fpm84/supervise \
     && mkfifo \
         /etc/s6/services/nginx/supervise/control \
-        /etc/s6/services/php-fpm83/supervise/control \
+        /etc/s6/services/php-fpm84/supervise/control \
     && chown -R ${UID}:${GID} /etc/s6 /run /srv/* /var/lib/nginx /var/www \
     && chmod o+rwx /run /var/lib/nginx /var/lib/nginx/tmp \
 # Clean up
