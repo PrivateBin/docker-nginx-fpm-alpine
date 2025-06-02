@@ -24,8 +24,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.30.0
         with:
           image-ref: 'privatebin/nginx-fpm-alpine:${{ github.sha }}'
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
+          format: sarif
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
 
