@@ -60,7 +60,7 @@ Note: The `Filesystem` data storage is supported out of the box. The image inclu
 
 #### Environment variables
 
-The following variables are passed down to the PHP application to support various scenarios. This allows certain seeting to be changed via the environment instead of a configuration file. Most of these variables relate to the storage backends:
+The following variables are passed down to the PHP application to support various scenarios. This allows certain settings to be changed via the environment instead of a configuration file. Most of these variables relate to the storage backends:
 
 ##### Amazon Web Services variables used by the S3 backend
 
