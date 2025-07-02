@@ -2,7 +2,7 @@
 
 **PrivateBin** is a minimalist, open source online [pastebin](https://en.wikipedia.org/wiki/Pastebin) where the server has zero knowledge of pasted data. Data is encrypted and decrypted in the browser using 256bit AES in [Galois Counter mode](https://en.wikipedia.org/wiki/Galois/Counter_Mode).
 
-This repository contains the Dockerfile and resources needed to create a docker image with a pre-installed PrivateBin instance in a secure default configuration. The images are based on the docker hub Alpine image, extended with the GD module required to generate discussion avatars and the Nginx webserver to serve static JavaScript libraries, CSS & the logos. All logs of php-fpm and Nginx (access & errors) are forwarded to docker logs.
+This repository contains the Dockerfile and resources needed to create a Docker image with a pre-installed PrivateBin instance in a secure default configuration. The images are based on the docker hub Alpine image, extended with the GD module required to generate discussion avatars and the Nginx webserver to serve static JavaScript libraries, CSS & the logos. All logs of php-fpm and Nginx (access & errors) are forwarded to docker logs.
 
 ## Image variants
 
@@ -60,7 +60,7 @@ Note: The `Filesystem` data storage is supported out of the box. The image inclu
 
 #### Environment variables
 
-The following variables do get passed down to the PHP application to support various scenarios. This allows changing some settings via the environment instead of a configuration file. Most of these relate to the storage backends:
+The following variables are passed down to the PHP application to support various scenarios. This allows certain settings to be changed via the environment instead of a configuration file. Most of these variables relate to the storage backends:
 
 ##### Amazon Web Services variables used by the S3 backend
 
@@ -99,16 +99,16 @@ The following variables are not used by default, but can be [enabled in your cus
 
 ##### Timezone settings
 
-The image supports the use of the following two environment variables to adjust the timezone. This is most useful to ensure the logs show the correct local time.
+The image supports the following two environment variables to adjust the timezone. This is especially useful to ensure the logs show the correct local time.
 
 - `TZ`
 - `PHP_TZ`
 
-Note: The application internally handles expiration of pastes based on a UNIX timestamp that is calculated based on the timezone set during its creation. Changing the PHP_TZ will affect this and leads to earlier (if the timezone is increased) or later (if it is decreased) expiration then expected.
+Note: The application internally handles expiration of pastes based on a UNIX timestamp that is calculated based on the timezone set during its creation. Changing the PHP_TZ will affect this and leads to earlier (if the timezone is increased) or later (if it is decreased) expiration than expected.
 
 ### Adjusting nginx or php-fpm settings
 
-You can attach your own `php.ini` or nginx configuration files to the folders `/etc/php/conf.d/` and `/etc/nginx/http.d/` respectively. This would for example let you adjust the maximum size these two services accept for file uploads, if you need more then the default 10 MiB.
+You can attach your own `php.ini` or nginx configuration files to the folders `/etc/php/conf.d/` and `/etc/nginx/http.d/` respectively. This, for example, would let you adjust the maximum size that these two services accept for file uploads, if you need more than the default 10 MiB.
 
 ### Kubernetes deployment
 
@@ -186,7 +186,7 @@ Note that the volume `privatebin-data` has to be a shared, persisted volume acro
 
 ## Running administrative scripts
 
-The image includes two administrative scripts, which you can use to migrate from one storage backend to another, delete pastes by ID, removing empty directories when using the Filesystem backend, to purge all expired pastes and display statistics. These can be executed within the running image or by running the commands as alternative entrypoints with the same volumes attached as in the running service image, the former option is recommended.
+The image includes two administrative scripts, which you can use to migrate from one storage backend to another, delete pastes by ID, removing empty directories when using the Filesystem backend, to purge all expired pastes and display statistics. These can be executed within the running image or by running the commands as alternative entrypoints with the same volumes attached as in the running service image. The former option is recommended.
 
 ```console
 # assuming you named your container "privatebin" using the option: --name privatebin
@@ -228,7 +228,7 @@ Options:
                    /srv/bin/../cfg/conf.php
 ```
 
-Note that in order to migrate between different storage backends you will need to use the all-in-one image called `privatebin/nginx-fpm-alpine`, as it comes with all the drivers and libraries for the different supported backends. When using the variant images, you will only be able to migrate within two backends of the same storage type, for example two filesystem paths or two database backends.
+Note that in order to migrate between different storage backends, you will need to use the all-in-one image called `privatebin/nginx-fpm-alpine`, as it includes all the necessary drivers and libraries for the supported backends. When using the variant images, you will only be able to migrate between two backends of the same storage type - for example, two filesystem paths or two database backends.
 
 ## Rolling your own image
 
