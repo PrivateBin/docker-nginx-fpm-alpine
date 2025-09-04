@@ -21,7 +21,7 @@ jobs:
           docker build -t privatebin/nginx-fpm-alpine:${{ github.sha }} .
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.33.0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: 'privatebin/nginx-fpm-alpine:${{ github.sha }}'
           format: sarif
