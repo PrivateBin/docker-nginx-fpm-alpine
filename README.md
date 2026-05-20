@@ -22,7 +22,7 @@ All images contain a release version of PrivateBin and are offered with the foll
 - `1.5.1` contains PrivateBin version 1.5.1 on the latest tagged release of the [docker image git repository](https://github.com/PrivateBin/docker-nginx-fpm-alpine) - gets updated when important security fixes are released for Alpine or upon new Alpine releases, same as stable
 - `1.5.1-...` are provided for selecting specific, immutable images
 
-If you update your images automatically via pulls, the `stable`, `nightly` or `latest` are recommended. If you prefer to have control and reproducability or use a form of orchestration, the numeric tags are probably preferable. The `edge` tag offers a preview of software in future Alpine releases and serves as an early warning system to detect image build issues in these.
+If you update your images automatically via pulls, the `stable`, `nightly` or `latest` are recommended. If you prefer to have control and reproducibility or use a form of orchestration, the numeric tags are probably preferable. The `edge` tag offers a preview of software in future Alpine releases and serves as an early warning system to detect image build issues in these.
 
 ## Image registries
 
@@ -35,14 +35,15 @@ These images are hosted on the Docker Hub and the GitHub container registries:
 Assuming you have docker successfully installed and internet access, you can fetch and run the image from the docker hub like this:
 
 ```console
-$ docker run -d --restart="always" --read-only -p 8080:8080 -v $PWD/privatebin-data:/srv/data privatebin/nginx-fpm-alpine
+$ docker run -d --restart="always" --read-only -p 8080:8080 -v $PWD/privatebin-data:/srv/data --tmpfs /tmp:nodev,noexec,mode=1777 --tmpfs /run:nodev,exec,mode=1777 privatebin/nginx-fpm-alpine
 ```
 
 The parameters in detail:
 
 - `-v $PWD/privatebin-data:/srv/data` - replace `$PWD/privatebin-data` with the path to the folder on your system, where the pastes and other service data should be persisted. This guarantees that your pastes aren't lost after you stop and restart the image or when you replace it. May be skipped if you just want to test the image or use database or Google Cloud Storage backend.
+- `--tmpfs /tmp:nodev,noexec,mode=1777 --tmpfs /run:nodev,exec,mode=1777` - attaches temporary, in-memory file systems for use by the service manager and small temporary files. These should get removed when restarting the service. You can skip these, but may have to clean them up manually, for example when the image upgrades PHP.
 - `-p 8080:8080` - The Nginx webserver inside the container listens on port 8080, this parameter exposes it on your system on port 8080. Be sure to use a reverse proxy for HTTPS termination in front of it in production environments.
-- `--read-only` - This image supports running in read-only mode. Using this reduces the attack surface slightly, since an exploit in one of the images services can't overwrite arbitrary files in the container. Only /tmp, /var/tmp, /var/run & /srv/data may be written into.
+- `--read-only` - This image supports running in read-only mode. Using this reduces the attack surface slightly, since an exploit in one of the images services can't overwrite arbitrary files in the container. Only /tmp, /run, /var/lib/nginx/tmp & /srv/data may be written into.
 - `-d` - launches the container in the background. You can use `docker ps` and `docker logs` to check if the container is alive and well.
 - `--restart="always"` - restart the container if it crashes, mainly useful for production setups
 
@@ -53,7 +54,7 @@ The parameters in detail:
 In case you want to use a customized [conf.php](https://github.com/PrivateBin/PrivateBin/blob/master/cfg/conf.sample.php) file, for example one that has file uploads enabled or that uses a different template, add the file as a second volume:
 
 ```console
-$ docker run -d --restart="always" --read-only -p 8080:8080 -v $PWD/conf.php:/srv/cfg/conf.php:ro -v $PWD/privatebin-data:/srv/data privatebin/nginx-fpm-alpine
+$ docker run -d --restart="always" --read-only -p 8080:8080 -v $PWD/conf.php:/srv/cfg/conf.php:ro -v $PWD/privatebin-data:/srv/data --tmpfs /tmp:nodev,noexec,mode=1777 --tmpfs /run:nodev,exec,mode=1777 privatebin/nginx-fpm-alpine
 ```
 
 Note: The `Filesystem` data storage is supported out of the box. The image includes PDO modules for MySQL and PostgreSQL, required for the `Database` one, but you still need to keep the /srv/data persisted for the server salt and the traffic limiter when using a release before 1.4.0.
@@ -112,7 +113,7 @@ You can attach your own `php.ini` or nginx configuration files to the folders `/
 
 ### Kubernetes deployment
 
-Below is an example deployment for Kubernetes.
+If you use helm, you may want to take a look at this [helm chart](https://github.com/PrivateBin/helm-chart). Below is an example deployment for Kubernetes.
 
 ```yaml
 ---
@@ -132,6 +133,7 @@ spec:
       labels:
         app: privatebin
     spec:
+      automountServiceAccountToken: false
       securityContext:
         runAsUser: 65534
         runAsGroup: 82
