@@ -14,11 +14,17 @@ on:
   schedule:
     - cron: '23 7 * * 5'
 
+permissions: {}
+
 jobs:
   snyk:
+    permissions:
+      security-events: write
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Build a Docker image
       run: docker build -t privatebin/nginx-fpm-alpine .
     - name: Run Snyk to check Docker image for vulnerabilities
