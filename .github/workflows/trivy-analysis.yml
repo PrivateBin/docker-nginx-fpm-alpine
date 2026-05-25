@@ -8,13 +8,19 @@ on:
   schedule:
     - cron: '20 13 * * 3'
 
+permissions: {}
+
 jobs:
   build:
     name: Trivy analysis
+    permissions:
+      security-events: write
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Build an image from Dockerfile
         run: |

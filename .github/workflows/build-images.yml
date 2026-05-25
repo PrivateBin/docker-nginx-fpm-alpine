@@ -9,6 +9,8 @@ on:
     branches: master
     tags: '*'
 
+permissions: {}
+
 jobs:
   buildx:
     runs-on: ubuntu-latest
@@ -21,6 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
         with:
