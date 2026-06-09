@@ -2,7 +2,7 @@
 
 name: Security-scan
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   schedule:
     - cron: '0 3 * * *' # everyday at 03:00 UTC
@@ -14,6 +14,8 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+permissions: {}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -27,8 +29,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: master
-    
+          persist-credentials: false
+
       # Runs a single command using the runners shell
       - name: Pull and start docker
         run: docker run -d --read-only -p 8080:8080 privatebin/nginx-fpm-alpine
@@ -38,9 +40,9 @@ jobs:
         uses: zaproxy/action-full-scan@v0.13.0
         with:
           # GitHub Token to create issues in the repository
-          #token: # optional, default is ${{ github.token }}
+          #token: # optional, default is github.token
           # Target URL
-          target: http://localhost:8080 
+          target: http://localhost:8080
           # Relative path of the ZAP configuration file
           rules_file_name: ".github/rules.tsv" # optional
           # The Docker file to be executed
