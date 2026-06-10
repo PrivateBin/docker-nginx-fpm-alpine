@@ -13,6 +13,8 @@ permissions: {}
 
 jobs:
   buildx:
+    permissions:
+      packages: write # for pushing ghcr images
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
