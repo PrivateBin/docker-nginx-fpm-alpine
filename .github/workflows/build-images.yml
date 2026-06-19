@@ -24,7 +24,7 @@ jobs:
     name: ${{ matrix.destination-image }} image / ${{ matrix.base-image }} release
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Set up QEMU
